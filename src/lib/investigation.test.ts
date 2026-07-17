@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { actionResult, proofGate } from "./investigation";
+import { actionResult, incidentReceipt, proofGate } from "./investigation";
 
 describe("Faultline proof engine", () => {
   it("does not unlock a fix from plausible but incomplete evidence", () => {
@@ -15,5 +15,9 @@ describe("Faultline proof engine", () => {
   });
   it("records a failing-to-passing regression result", () => {
     expect(actionResult("regression").fact).toContain("reproduces");
+  });
+  it("only produces an Incident Receipt after the proof gate passes", () => {
+    expect(incidentReceipt(["logs", "trace", "diff", "config"])).toBeNull();
+    expect(incidentReceipt(["logs", "trace", "diff", "config", "infra", "regression"])?.rootCause).toContain("r42");
   });
 });

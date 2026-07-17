@@ -26,3 +26,15 @@ export function proofGate(completed: ActionId[]) {
   const score = requirements.filter((item) => item.met).length;
   return { requirements, score, complete: score === requirements.length };
 }
+
+export function incidentReceipt(completed: ActionId[]) {
+  if (!proofGate(completed).complete) return null;
+  return {
+    id: "FL-INC-042-R42",
+    confidence: "High - deterministic reproduction",
+    rootCause: "Deploy r42 halved DATABASE_POOL_LIMIT from 40 to 20, exhausting data-service connections in AZ-A and timing out auth and payment requests.",
+    rejected: "DNS event: rejected. It affected another zone and no AZ-A routing change was recorded.",
+    test: "connection-pool.regression: fails at pool limit 20 and passes at 40.",
+    patch: "Restore DATABASE_POOL_LIMIT=40 and retain the regression test.",
+  };
+}
