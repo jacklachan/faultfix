@@ -15,6 +15,7 @@ const records: Record<ActionId, { id: ActionId; kind: string; fact: string; sour
 };
 export const initialInvestigation = { completed: [] as ActionId[] };
 export function actionResult(id: ActionId) { return records[id]; }
+export function nextAction(completed: ActionId[]) { return ACTIONS.find((action) => !completed.includes(action.id)); }
 export function proofGate(completed: ActionId[]) {
   const has = (ids: ActionId[]) => ids.every((id) => completed.includes(id));
   const requirements = [
