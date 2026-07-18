@@ -197,6 +197,109 @@
   cursor: pointer;
   font-size: 12px;
 }
+.remediationBody {
+  padding: 25px 5px 8px;
+}
+.packetHeadline {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  align-items: flex-start;
+}
+.packetHeadline h2 {
+  color: #eaf7f1;
+  font-size: 28px;
+  letter-spacing: -0.06em;
+  margin: 10px 0;
+}
+.reversible {
+  border: 1px solid #4fba96;
+  color: #76e6bd;
+  padding: 6px 8px;
+  font: 9px var(--font-geist-mono);
+  white-space: nowrap;
+}
+.change {
+  margin: 0 0 17px;
+  color: #b7cec6;
+  font-size: 14px;
+  line-height: 1.55;
+}
+.packetMeta {
+  display: grid;
+  grid-template-columns: 1.3fr 0.65fr 1fr;
+  border: 1px solid #294840;
+  background: #0a1a1a;
+}
+.packetMeta span {
+  padding: 10px;
+  border-right: 1px solid #294840;
+  color: #a8c0b8;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.packetMeta span:last-child {
+  border: 0;
+}
+.packetMeta b {
+  display: block;
+  margin-bottom: 5px;
+  color: #6fcdae;
+  font: 9px var(--font-geist-mono);
+  letter-spacing: 0.07em;
+}
+.packetGrid {
+  display: grid;
+  gap: 8px;
+  margin: 17px 0;
+}
+.packetGrid article {
+  border: 1px solid #263f3b;
+  background: #0a1618;
+  padding: 12px;
+}
+.packetGrid article > span {
+  color: #78d7b6;
+  font: 9px var(--font-geist-mono);
+  letter-spacing: 0.07em;
+}
+.packetGrid ul {
+  display: grid;
+  gap: 7px;
+  margin: 10px 0 0;
+  padding-left: 17px;
+  color: #c0d0ca;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.haltCard {
+  border-color: #7a4e2b !important;
+  background: #1a110c !important;
+}
+.haltCard > span {
+  color: #ffad66 !important;
+}
+.rollback {
+  border-left: 2px solid #ed9a52;
+  background: #21150d;
+  padding: 11px 13px;
+}
+.rollback b {
+  color: #f6b06f;
+  font: 9px var(--font-geist-mono);
+  letter-spacing: 0.08em;
+}
+.rollback p {
+  margin: 5px 0 0;
+  color: #ffe8d8;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.noExecution {
+  margin: 15px 0 0;
+  color: #71877f;
+  font: 10px/1.45 var(--font-geist-mono);
+}
 @media (max-width: 620px) {
   .challengeBody dl div,
   .receiptBody dl div {
@@ -218,5 +321,21 @@
   .certificateFoot {
     align-items: flex-start;
     flex-direction: column;
+  }
+  .packetHeadline {
+    display: block;
+  }
+  .reversible {
+    display: inline-block;
+  }
+  .packetMeta {
+    grid-template-columns: 1fr;
+  }
+  .packetMeta span {
+    border-right: 0;
+    border-bottom: 1px solid #294840;
+  }
+  .packetMeta span:last-child {
+    border: 0;
   }
 }

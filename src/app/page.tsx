@@ -8,6 +8,7 @@ import {
   nextAction,
   proofCertificate,
   proofGate,
+  remediationPlan,
   type ActionId,
 } from "@/lib/investigation";
 import { type RankingResult } from "@/lib/local-ranking";
@@ -22,6 +23,7 @@ export default function Home() {
   const [showProof, setShowProof] = useState(false);
   const [showReceipt, setShowReceipt] = useState(false);
   const [showCertificate, setShowCertificate] = useState(false);
+  const [showRemediation, setShowRemediation] = useState(false);
   const [showChallenge, setShowChallenge] = useState(false);
   const [localRanking, setLocalRanking] = useState<RankingResult | null>(null);
   const [isCheckingLocalRanking, setIsCheckingLocalRanking] = useState(false);
@@ -39,6 +41,10 @@ export default function Home() {
     () => proofCertificate(investigation.completed),
     [investigation.completed],
   );
+  const plan = useMemo(
+    () => remediationPlan(investigation.completed),
+    [investigation.completed],
+  );
   const next = nextAction(investigation.completed);
   const evidence = investigation.completed.map(actionResult);
   useEffect(() => {
@@ -47,6 +53,7 @@ export default function Home() {
       setShowProof(false);
       setShowReceipt(false);
       setShowCertificate(false);
+      setShowRemediation(false);
       setShowChallenge(false);
     }
     window.addEventListener("keydown", closeOnEscape);
@@ -105,6 +112,7 @@ export default function Home() {
     setShowProof(false);
     setShowReceipt(false);
     setShowCertificate(false);
+    setShowRemediation(false);
     setShowChallenge(false);
   }
   function exportReceipt() {
@@ -365,6 +373,9 @@ export default function Home() {
               <button onClick={() => setShowCertificate(true)}>
                 Inspect causal certificate -&gt;
               </button>
+              <button onClick={() => setShowRemediation(true)}>
+                Open safe change packet -&gt;
+              </button>
               <button onClick={() => setShowProof(true)}>
                 View candidate patch -&gt;
               </button>
@@ -531,6 +542,84 @@ export default function Home() {
                 Challenge the proof -&gt;
               </button>
             </div>
+          </div>
+        </section>
+      )}
+      {showRemediation && plan && (
+        <section
+          className={phase2.modal}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Safe change packet"
+        >
+          <div className={phase2.modalHeader}>
+            <span>SAFE CHANGE PACKET / {plan.id}</span>
+            <button
+              aria-label="Close safe change packet"
+              onClick={() => setShowRemediation(false)}
+            >
+              x
+            </button>
+          </div>
+          <div className={phase2.remediationBody}>
+            <div className={phase2.packetHeadline}>
+              <div>
+                <span className={phase2.rejectedTag}>
+                  REMEDIATION IS PROPOSED — NOT EXECUTED
+                </span>
+                <h2>Make the smallest reversible change.</h2>
+              </div>
+              <span className={phase2.reversible}>↺ REVERSIBLE</span>
+            </div>
+            <p className={phase2.change}>{plan.change}</p>
+            <div className={phase2.packetMeta}>
+              <span>
+                <b>SCOPE</b>
+                {plan.scope}
+              </span>
+              <span>
+                <b>OWNER</b>
+                {plan.owner}
+              </span>
+              <span>
+                <b>EXPIRY</b>
+                {plan.expiry}
+              </span>
+            </div>
+            <div className={phase2.packetGrid}>
+              <article>
+                <span>01 / BEFORE YOU START</span>
+                <ul>
+                  {plan.preconditions.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </article>
+              <article>
+                <span>02 / PROVE RECOVERY</span>
+                <ul>
+                  {plan.verify.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </article>
+              <article className={phase2.haltCard}>
+                <span>03 / STOP THE CHANGE IF</span>
+                <ul>
+                  {plan.halt.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </article>
+            </div>
+            <div className={phase2.rollback}>
+              <b>ROLLBACK</b>
+              <p>{plan.rollback}</p>
+            </div>
+            <p className={phase2.noExecution}>
+              This is a simulated review packet. Faultfix will never modify
+              infrastructure or deploy a change.
+            </p>
           </div>
         </section>
       )}

@@ -5,6 +5,7 @@ import {
   nextAction,
   proofCertificate,
   proofGate,
+  remediationPlan,
 } from "./investigation";
 
 describe("faultfix proof engine", () => {
@@ -73,5 +74,19 @@ describe("faultfix proof engine", () => {
     expect(proofCertificate([...completed]).fingerprint).toBe(
       certificate.fingerprint,
     );
+  });
+  it("only creates a bounded, reversible remediation packet after causal proof", () => {
+    expect(remediationPlan(["logs", "trace", "diff", "config"])).toBeNull();
+    const plan = remediationPlan([
+      "logs",
+      "trace",
+      "diff",
+      "config",
+      "infra",
+      "regression",
+    ]);
+    expect(plan?.reversible).toBe(true);
+    expect(plan?.scope).toContain("5%");
+    expect(plan?.halt).toHaveLength(3);
   });
 });

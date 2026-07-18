@@ -148,6 +148,52 @@ export function proofCertificate(completed: ActionId[]) {
   };
 }
 
+export type RemediationPlan = {
+  id: string;
+  ready: boolean;
+  change: string;
+  reversible: boolean;
+  scope: string;
+  owner: string;
+  expiry: string;
+  preconditions: string[];
+  verify: string[];
+  halt: string[];
+  rollback: string;
+};
+
+/** A simulated, reviewable change packet. It never performs a production action. */
+export function remediationPlan(completed: ActionId[]): RemediationPlan | null {
+  if (!proofGate(completed).complete) return null;
+  return {
+    id: "FF-CHANGE-042-A",
+    ready: true,
+    change: "Restore DATABASE_POOL_LIMIT from 20 to 40.",
+    reversible: true,
+    scope:
+      "5% of AZ-A payments-api traffic for 10 minutes, then staged promotion.",
+    owner: "Payments on-call",
+    expiry: "Valid only for incident INC-042 and the recorded r42 state.",
+    preconditions: [
+      "Causal certificate FF-INC-042-R42 is complete.",
+      "No data-corruption signal is present.",
+      "Previous configuration value (40) is available for rollback.",
+    ],
+    verify: [
+      "AZ-A checkout p95 remains below 300ms for 10 minutes.",
+      "Connection acquisition failures return to baseline.",
+      "The regression test passes at pool limit 40.",
+    ],
+    halt: [
+      "Checkout error rate rises above the pre-change baseline.",
+      "Connection saturation exceeds 85% during the canary.",
+      "Any new zone shows correlated failures.",
+    ],
+    rollback:
+      "Set DATABASE_POOL_LIMIT back to 20 and preserve the incident record for review.",
+  };
+}
+
 export function incidentReceipt(completed: ActionId[]) {
   if (!proofGate(completed).complete) return null;
   return {
