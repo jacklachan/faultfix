@@ -228,6 +228,7 @@ def invoke_hf_completion(client, model, prompt):
         ],
         temperature=0,
         max_tokens=360,
+        response_format={"type": "json_object"},
     )
     return completion.choices[0].message.content
 
