@@ -1,5 +1,5 @@
 ---
-title: faultfix ranking service
+title: faultfix incident lab
 emoji: "🔎"
 colorFrom: gray
 colorTo: gray
@@ -10,8 +10,11 @@ pinned: false
 license: mit
 ---
 
-# faultfix ranking service
+# faultfix incident lab
 
-This public Hugging Face Space provides an optional, model-backed ranking of the two bundled faultfix incident hypotheses. It is advisory only: it does not prove causality or unlock a fix.
+This public Space demonstrates two bounded, safe Faultfix capabilities:
 
-The service runs `google/flan-t5-small` on a constrained prompt and returns a complete ordering of the supplied IDs. If the model response cannot be validated, it returns the supplied deterministic order instead.
+1. An optional model-backed ranking of the two bundled incident hypotheses. It is advisory only and cannot prove causality or unlock a fix.
+2. An agent-safety baseline that visibly evaluates the authority of read-only investigation, reversible containment, and permanent remediation decisions.
+
+The agent baseline is deterministic and explicitly labelled as such while no `OPENAI_API_KEY` is configured. When a hosted investigator is added, it may choose evidence actions but cannot grant itself authority: Faultfix continues to return `allow`, `review`, or `block` according to the deterministic policy.
