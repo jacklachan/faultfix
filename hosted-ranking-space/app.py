@@ -869,4 +869,6 @@ with gr.Blocks(title="faultfix | agent authority lab", css=CSS, head=HEAD) as de
     api_trigger = gr.Button(visible=False)
     api_trigger.click(rank_hypotheses, inputs=api_input, outputs=api_output, api_name="rank_hypotheses", api_description="Return an advisory ranking for hypothesis JSON.")
 
-demo.launch()
+# The standard Gradio server is sufficient for this single-process Space.
+# Disabling experimental SSR avoids its Node sidecar failing the Space health check.
+demo.launch(ssr_mode=False)
