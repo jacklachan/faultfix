@@ -23,6 +23,6 @@ This public Space demonstrates two bounded, safe Faultfix capabilities:
 
 ## Configure the live model
 
-In the Space **Settings**, add a secret named `HF_TOKEN` with an Hugging Face User Access Token that has inference permission. The Space will use Hugging Face Inference Providers and bill your Hugging Face credits; `HF_MODEL` can optionally override the default `deepseek-ai/DeepSeek-V3-0324`. If no HF token is present, `GEMINI_API_KEY` is also supported as a free-tier fallback. All keys are read server-side only and must never be committed to this repository or pasted into the app UI.
+In the Space **Settings**, add a secret named `HF_TOKEN` with an Hugging Face User Access Token that has inference permission. The Space will use Hugging Face Inference Providers and bill your Hugging Face credits. Its default is `openai/gpt-oss-120b`, with `deepseek-ai/DeepSeek-V3-0324` as an automatic server-side fallback if the preferred model is unavailable. `HF_MODEL` and `HF_FALLBACK_MODEL` can override those choices. If no HF token is present, `GEMINI_API_KEY` is also supported as a free-tier fallback. All keys are read server-side only and must never be committed to this repository or pasted into the app UI.
 
 The agent baseline is deterministic and explicitly labelled as such while no `OPENAI_API_KEY` is configured. When a hosted investigator is added, it may choose evidence actions but cannot grant itself authority: Faultfix continues to return `allow`, `review`, or `block` according to the deterministic policy.

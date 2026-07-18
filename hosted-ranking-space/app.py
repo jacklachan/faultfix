@@ -160,7 +160,7 @@ Do not claim a permanent change is authorized. The policy layer, not you, decide
 
 def configured_provider():
     if os.getenv("HF_TOKEN"):
-        return "Hugging Face Inference Providers", os.getenv("HF_MODEL", "deepseek-ai/DeepSeek-V3-0324")
+        return "Hugging Face Inference Providers", os.getenv("HF_MODEL", "openai/gpt-oss-120b")
     if os.getenv("GEMINI_API_KEY"):
         return "Gemini", os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
     if os.getenv("GROQ_API_KEY"):
@@ -181,6 +181,19 @@ def post_json(url, payload, headers):
         return json.loads(response.read().decode("utf-8"))
 
 
+def invoke_hf_completion(client, model, prompt):
+    completion = client.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "system", "content": LIVE_SYSTEM},
+            {"role": "user", "content": prompt},
+        ],
+        temperature=0,
+        max_tokens=360,
+    )
+    return completion.choices[0].message.content
+
+
 def invoke_live_model(prompt):
     provider, model = configured_provider()
     if not provider:
@@ -192,16 +205,15 @@ def invoke_live_model(prompt):
                 provider=os.getenv("HF_PROVIDER", "auto"),
                 timeout=25,
             )
-            completion = client.chat.completions.create(
-                model=model,
-                messages=[
-                    {"role": "system", "content": LIVE_SYSTEM},
-                    {"role": "user", "content": prompt},
-                ],
-                temperature=0,
-                max_tokens=360,
-            )
-            text = completion.choices[0].message.content
+            try:
+                text = invoke_hf_completion(client, model, prompt)
+            except Exception:
+                fallback_model = os.getenv("HF_FALLBACK_MODEL", "deepseek-ai/DeepSeek-V3-0324")
+                if model == fallback_model:
+                    raise
+                text = invoke_hf_completion(client, fallback_model, prompt)
+                provider = "Hugging Face Inference Providers (fallback)"
+                model = fallback_model
         elif provider == "Gemini":
             payload = {
                 "systemInstruction": {"parts": [{"text": LIVE_SYSTEM}]},
