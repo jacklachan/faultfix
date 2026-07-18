@@ -52,7 +52,7 @@ The graphic above and the diagram are the same contract: raw, untrusted content 
 | **Hostile ticket** | A global production command is `BLOCK`ed and **0** raw ticket bytes reach model context | Prompt injection is stopped before inference, not “handled” by asking the model nicely |
 | **INC-042** | A reversible containment route before causal proof is complete | Containment is not a root-cause verdict |
 | **Four-pack challenge** | Capacity, DNS, identity rotation, and insufficient-evidence packs | The model advises across different cases; the authority policy stays the same |
-| **Public GCE pack** | A public Google Cloud postmortem becomes provenance-tagged evidence | The product can work with real public evidence without pretending it has live production telemetry |
+| **Public case library** | Google Cloud and Cloudflare postmortems become provenance-tagged evidence | The product can work with real public evidence without pretending it has live production telemetry |
 
 <p align="center">
   <a href="https://huggingface.co/spaces/jacklachan/faultfix"><kbd>Start with the hostile-ticket block</kbd></a>
@@ -97,11 +97,13 @@ Before causal proof is complete, Faultfix can offer a separate, simulated contai
 | --- | --- |
 | `INC-042`, causal graph, regression, containment packet, and prevention guardrail | Deterministic fixture bundled with the app; no production system is queried |
 | Evidence Firewall and Action Lease | Real policy mechanics shown through a deterministic security demo; the lease is simulated, scoped, time-bounded, and evidence-bound |
-| Google Cloud GCE evidence pack | Structured from a public postmortem; it is read-only public evidence, not private raw telemetry or an independent re-investigation |
+| Google Cloud GCE and Cloudflare incident packs | Structured from official public postmortems; they are read-only public evidence, not private raw telemetry or independent re-investigations |
 | Hosted Space ranking | Runs keylessly with a small model plus deterministic fallback |
 | Hosted live investigator | Optional. It requires a deployer-configured provider secret; its responses are validated and advisory only |
 
 No model can alter the evidence sequence, proof score, containment authority, incident receipt, or permanent-fix gate.
+
+The public case library links directly to the original [Google Cloud GCE postmortem](https://status.cloud.google.com/incident/compute/16007?post-mortem=) and [Cloudflare November 2025 postmortem](https://blog.cloudflare.com/18-november-2025-outage/). Faultfix displays bounded, paraphrased facts from those sources; it does not ingest their raw content into a model.
 
 ---
 

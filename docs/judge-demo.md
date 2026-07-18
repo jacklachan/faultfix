@@ -33,6 +33,10 @@ The credibility anchors are OWASP’s excessive-agency guidance and DeepMind’s
 
 ## Hostile judge answers
 
+**Public-source evidence?**
+
+“Faultfix’s case library contains bounded, source-linked facts from Google Cloud and Cloudflare postmortems. It labels them as read-only public evidence, never claims private telemetry, and never lets raw source text become model input or action authority.”
+
 **“Isn’t the incident scripted?”**
 
 “The incidents are transparent fixtures. The controls are the product: the firewall builds the model context, the live model runs against it, model output is schema-validated, and the policy independently governs every action. Run the attack trace or four-pack suite to inspect that boundary.”
