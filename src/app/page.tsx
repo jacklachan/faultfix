@@ -17,8 +17,10 @@ import {
   evaluatePoolLimitGuardrail,
   type ActionId,
 } from "@/lib/investigation";
-import { type RankingResult } from "@/lib/local-ranking";
-import { rankHypothesesWithHostedSpace } from "@/lib/hosted-ranking";
+import {
+  rankHypothesesWithHostedSpace,
+  type RankingResult,
+} from "@/lib/hosted-ranking";
 import { BASELINE_AGENT_SCORE, baselineAgentRun } from "@/lib/agent-lab";
 import {
   FIREWALL_DEMO_ARTIFACTS,
@@ -31,7 +33,7 @@ import {
 } from "@/lib/evidence-firewall";
 import styles from "./page.module.css";
 import phase2 from "./phase2.module.css";
-import local from "./local-ranking.module.css";
+import ranking from "./advisory-ranking.module.css";
 
 const INCIDENT_CLOCK_START_SECONDS = 42 * 60 + 17;
 
@@ -78,10 +80,10 @@ export default function Home() {
   const [showGuardrail, setShowGuardrail] = useState(false);
   const [candidatePoolLimit, setCandidatePoolLimit] = useState(20);
   const [showChallenge, setShowChallenge] = useState(false);
-  const [localRanking, setLocalRanking] = useState<RankingResult | null>(null);
-  const [isCheckingLocalRanking, setIsCheckingLocalRanking] = useState(false);
-  const rankingAbort = useRef<AbortController | null>(null);
-  const rankingRun = useRef(0);
+  const [hostedRanking, setHostedRanking] = useState<RankingResult | null>(null);
+  const [isCheckingHostedRanking, setIsCheckingHostedRanking] = useState(false);
+  const hostedRankingAbort = useRef<AbortController | null>(null);
+  const hostedRankingRun = useRef(0);
   const gate = useMemo(
     () => proofGate(investigation.completed),
     [investigation.completed],
@@ -186,12 +188,12 @@ export default function Home() {
       if (actionId === "regression") setShowProof(true);
     }
   }
-  async function checkLocalRanking() {
-    if (isCheckingLocalRanking) return;
+  async function checkHostedRanking() {
+    if (isCheckingHostedRanking) return;
     const controller = new AbortController();
-    const run = ++rankingRun.current;
-    rankingAbort.current = controller;
-    setIsCheckingLocalRanking(true);
+    const run = ++hostedRankingRun.current;
+    hostedRankingAbort.current = controller;
+    setIsCheckingHostedRanking(true);
     try {
       const result = await rankHypothesesWithHostedSpace(
         [
@@ -207,23 +209,23 @@ export default function Home() {
         ],
         { signal: controller.signal },
       );
-      if (run === rankingRun.current) setLocalRanking(result);
+      if (run === hostedRankingRun.current) setHostedRanking(result);
     } finally {
-      if (run === rankingRun.current) setIsCheckingLocalRanking(false);
+      if (run === hostedRankingRun.current) setIsCheckingHostedRanking(false);
     }
   }
-  function cancelLocalRanking() {
-    rankingRun.current += 1;
-    rankingAbort.current?.abort();
-    rankingAbort.current = null;
-    setIsCheckingLocalRanking(false);
+  function cancelHostedRanking() {
+    hostedRankingRun.current += 1;
+    hostedRankingAbort.current?.abort();
+    hostedRankingAbort.current = null;
+    setIsCheckingHostedRanking(false);
   }
-  function clearLocalRanking() {
-    cancelLocalRanking();
-    setLocalRanking(null);
+  function clearHostedRanking() {
+    cancelHostedRanking();
+    setHostedRanking(null);
   }
   function resetInvestigation() {
-    clearLocalRanking();
+    clearHostedRanking();
     setInvestigation(initialInvestigation);
     setSelected(null);
     setShowProof(false);
@@ -495,21 +497,21 @@ export default function Home() {
               </div>
             </div>
           ))}
-          <div className={local.status}>
+          <div className={ranking.status}>
             <b>HOSTED MODEL / OPTIONAL</b>
             <small>
-              {isCheckingLocalRanking
+              {isCheckingHostedRanking
                 ? "Checking hosted model. Proof remains deterministic."
-                : localRanking
-                  ? localRanking.detail
+                : hostedRanking
+                  ? hostedRanking.detail
                   : "Model ranking is off by default. Proof remains deterministic."}
             </small>
-            {localRanking?.source === "huggingface-space" &&
-              localRanking.status === "ranked" && (
-                <div className={local.ranking}>
+            {hostedRanking?.source === "huggingface-space" &&
+              hostedRanking.status === "ranked" && (
+                <div className={ranking.ranking}>
                   <b>ADVISORY ORDER / NOT PROOF</b>
                   <ol>
-                    {localRanking.rankedIds.map((id) => (
+                    {hostedRanking.rankedIds.map((id) => (
                       <li key={id}>
                         {id === "pool-limit"
                           ? "Pool-limit change"
@@ -520,20 +522,20 @@ export default function Home() {
                 </div>
               )}
             <button
-              onClick={checkLocalRanking}
-              disabled={isCheckingLocalRanking}
+              onClick={checkHostedRanking}
+              disabled={isCheckingHostedRanking}
             >
-              {isCheckingLocalRanking
+              {isCheckingHostedRanking
                 ? "Checking hosted model..."
-                : localRanking
+                : hostedRanking
                   ? "Recheck hosted model"
                   : "Check hosted model"}
             </button>
-            {isCheckingLocalRanking && (
-              <button onClick={cancelLocalRanking}>Cancel check</button>
+            {isCheckingHostedRanking && (
+              <button onClick={cancelHostedRanking}>Cancel check</button>
             )}
-            {localRanking && (
-              <button onClick={clearLocalRanking}>Clear ranking</button>
+            {hostedRanking && (
+              <button onClick={clearHostedRanking}>Clear ranking</button>
             )}
           </div>
           {!gate.complete ? (

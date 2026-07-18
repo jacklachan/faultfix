@@ -1,4 +1,11 @@
-import type { Hypothesis, RankingResult } from "./local-ranking";
+export type Hypothesis = { id: string; claim: string };
+
+export type RankingResult = {
+  source: "huggingface-space" | "deterministic";
+  status: "ranked" | "unavailable";
+  rankedIds: string[];
+  detail: string;
+};
 
 export const HOSTED_RANKING_ENDPOINT = "https://jacklachan-faultfix.hf.space/gradio_api/call/rank_hypotheses";
 export const HOSTED_RANKING_TIMEOUT_MS = 30_000;

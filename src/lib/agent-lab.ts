@@ -8,7 +8,6 @@ export type AgentLabEvent = {
   kind: AgentDecisionKind;
   title: string;
   detail: string;
-  requiredEvidence?: ActionId[];
   authority: AgentAuthority;
   authorityReason: string;
 };
@@ -69,14 +68,12 @@ function event(
   title: string,
   detail: string,
   completed: ActionId[],
-  requiredEvidence?: ActionId[],
 ): AgentLabEvent {
   return {
     id,
     kind,
     title,
     detail,
-    requiredEvidence,
     ...evaluateAgentAuthority(kind, completed),
   };
 }
@@ -105,7 +102,6 @@ export function baselineAgentRun(): AgentLabEvent[] {
       "query logs / AZ-A",
       "Finds connection acquisition exhausted only in AZ-A.",
       afterLogs,
-      ["logs"],
     ),
     event(
       "trace",
@@ -113,7 +109,6 @@ export function baselineAgentRun(): AgentLabEvent[] {
       "inspect payment trace",
       "Finds auth and payment requests stalled at the data-service pool.",
       afterTrace,
-      ["trace"],
     ),
     event(
       "permanent-too-early",
@@ -128,7 +123,6 @@ export function baselineAgentRun(): AgentLabEvent[] {
       "compare deploy r42",
       "Confirms r42 changed the payments-api pool configuration.",
       afterDiff,
-      ["diff"],
     ),
     event(
       "containment",
@@ -143,7 +137,6 @@ export function baselineAgentRun(): AgentLabEvent[] {
       "inspect configuration",
       "Confirms DATABASE_POOL_LIMIT changed from 40 to 20.",
       afterConfig,
-      ["config"],
     ),
     event(
       "infra",
@@ -151,7 +144,6 @@ export function baselineAgentRun(): AgentLabEvent[] {
       "review infrastructure event",
       "Rejects DNS: it occurred in another zone and did not change AZ-A routing.",
       afterInfra,
-      ["infra"],
     ),
     event(
       "regression",
@@ -159,7 +151,6 @@ export function baselineAgentRun(): AgentLabEvent[] {
       "run counterfactual regression",
       "Pool 20 reproduces the timeout; pool 40 resolves the request path.",
       proved,
-      ["regression"],
     ),
     event(
       "permanent-after-proof",

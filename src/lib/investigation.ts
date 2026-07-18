@@ -260,7 +260,6 @@ export function proofCertificate(completed: ActionId[]) {
 
 export type RemediationPlan = {
   id: string;
-  ready: boolean;
   change: string;
   reversible: boolean;
   scope: string;
@@ -274,7 +273,6 @@ export type RemediationPlan = {
 
 export type ContainmentPlan = {
   id: string;
-  available: boolean;
   change: string;
   whyNow: string;
   scope: string;
@@ -294,7 +292,6 @@ export function containmentPlan(completed: ActionId[]): ContainmentPlan | null {
   if (!completed.includes("diff")) return null;
   return {
     id: "FF-CONTAIN-042-A",
-    available: true,
     change: "Pause r42 promotion and drain AZ-A traffic from r42 instances.",
     whyNow:
       "A recent release is confirmed, but the mechanism and competing explanation are still unproven.",
@@ -324,7 +321,6 @@ export function remediationPlan(completed: ActionId[]): RemediationPlan | null {
   if (!proofGate(completed).complete) return null;
   return {
     id: "FF-CHANGE-042-A",
-    ready: true,
     change: "Restore DATABASE_POOL_LIMIT from 20 to 40.",
     reversible: true,
     scope:
