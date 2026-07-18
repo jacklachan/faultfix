@@ -4,6 +4,20 @@ faultfix is an evidence-first incident investigator for the distinction on-call 
 
 This is a self-contained product demo. The payments incident, evidence sources, causal graph, regression result, containment packet, and prevention guardrail are deterministic and bundled in the app. No production systems, credentials, or API keys are required.
 
+## Why Faultfix now
+
+Operations teams are rapidly adopting AI systems that can investigate and act in production. For example, Resolve AI announced a $125M Series A at a $1B valuation in February 2026 for AI production operations. Faultfix is deliberately **not another incident investigator** competing on faster summaries or lower MTTR. It is the authority layer those investigators need: the component that decides what evidence an agent may use and whether the action it proposes is allowed, reviewed, or blocked. [Resolve AI announcement](https://resolve.ai/news/resolveai-raises-125-million-series-a)
+
+The design implements well-established agent-security ideas in an incident-response workflow:
+
+- **Excessive agency → allow / review / block.** OWASP identifies excessive agency as a key LLM risk and recommends approval routines for state-changing operations. Faultfix keeps read-only investigation available, routes bounded containment to human review, and blocks permanent changes until evidence and reproduction exist. [OWASP guidance](https://owasp.org/www-project-top-10-for-large-language-model-applications/2_0_vulns/LLM06_ExcessiveAgency.html)
+- **Untrusted retrieved content → Evidence Firewall.** Evidence is classified by trust, fingerprint, and replay time before a model sees it. Untrusted instruction-like content is quarantined, so it cannot become either model context or action authority.
+- **Least agency → Action Lease.** A human approval is time-bounded, command-scoped, resource-scoped, and bound to one evidence snapshot instead of creating standing agent permission.
+
+This direction also aligns with Google DeepMind’s CaMeL research: keep untrusted data out of control flow and rely on conventional security controls rather than asking an LLM to reliably distinguish data from instructions. Faultfix is a lightweight, incident-response-specific implementation of that principle; it does not claim to be CaMeL. [CaMeL paper](https://arxiv.org/abs/2503.18813)
+
+**Product direction:** Faultfix can become an MCP policy gateway: any agent can investigate through its tools, while Faultfix issues evidence-bound action leases and enforces the authority decision at the boundary.
+
 ## Run locally
 
 ```bash

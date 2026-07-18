@@ -311,7 +311,7 @@ def normalize_live_answer(text):
             "claim_status": "unsupported",
             "next_evidence": "Return valid structured output and collect another trusted artifact.",
             "requested_action": "none",
-            "rationale": f"Diagnostic snapshot: {candidate[:420]}",
+            "rationale": "The model output could not be validated.",
             "evidence_ids_used": [],
         }, False
     choices = {"pool-limit", "dns-event", "credential-rotation", "insufficient-evidence"}
@@ -455,7 +455,7 @@ warm_ranker()
 
 
 with gr.Blocks(title="faultfix | agent authority lab", css=CSS) as demo:
-    gr.HTML("""<header id='masthead'><div><div class='kicker'><span class='pulse'></span>FAULTFIX / AGENT AUTHORITY</div><h1>AI agents must<br><span class='emphasis'>earn the right to act.</span></h1><p class='subtitle'>A model can investigate an incident. Faultfix decides what evidence can influence it, which action is in scope, and whether that action is allowed.</p></div><aside class='matrix'><div class='matrix-head'><span>ONE RULE / ALL INCIDENTS</span><span>SIMULATED</span></div><div class='matrix-row'><span>Read trusted evidence</span><b class='allow'>ALLOW</b></div><div class='matrix-row'><span>Contain a scoped impact</span><b class='review'>REVIEW</b></div><div class='matrix-row'><span>Make a permanent change</span><b class='block'>BLOCKED</b></div><p class='matrix-note'>The model can recommend. Faultfix is the authority.</p></aside></header>""")
+    gr.HTML("""<header id='masthead'><div><div class='kicker'><span class='pulse'></span>FAULTFIX / AGENT AUTHORITY</div><h1>AI agents must<br><span class='emphasis'>earn the right to act.</span></h1><p class='subtitle'>Not another incident investigator: Faultfix sits beneath any agent and decides what evidence can influence it, which action is in scope, and whether that action is allowed.</p></div><aside class='matrix'><div class='matrix-head'><span>ONE RULE / ALL INCIDENTS</span><span>SIMULATED</span></div><div class='matrix-row'><span>Read trusted evidence</span><b class='allow'>ALLOW</b></div><div class='matrix-row'><span>Contain a scoped impact</span><b class='review'>REVIEW</b></div><div class='matrix-row'><span>Make a permanent change</span><b class='block'>BLOCKED</b></div><p class='matrix-note'>The model can recommend. Faultfix is the authority.</p></aside></header>""")
     attack_button = gr.Button("Start here: block a hostile production command", elem_id="firewall-challenge")
     attack_output = gr.HTML("<p class='footer-note'>THE FASTEST DEMO: SHOW WHAT THE AGENT IS NEVER ALLOWED TO SEE OR DO.</p>")
     gr.HTML("""<section class='scenario-strip'><article><b>INC-042 / CAPACITY</b><span>r42 reduces a connection pool. A model investigates; the causal proof still decides.</span></article><article><b>INC-103 / IDENTITY</b><span>A credential rotation breaks token exchange. Reversible rollback may be reviewed, never assumed.</span></article><article><b>ATTACK-001 / UNTRUSTED</b><span>A hostile ticket requests a global write. It is quarantined before model inference.</span></article></section>""")

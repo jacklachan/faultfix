@@ -6,9 +6,26 @@
 
 Faultfix lets a model investigate, but only trusted, time-bounded evidence can influence it—and a deterministic policy still decides whether an action is allowed, reviewed, or blocked.
 
+## One-slide positioning
+
+**Title:** The missing authority layer for AI operations
+
+| The market is building | Faultfix adds |
+| --- | --- |
+| Agents that investigate and operate production | A governor that makes them earn the right to act |
+| Model recommendations | Evidence trust, replay boundaries, and output validation |
+| Broad standing permissions | Scoped, time-bounded Action Leases |
+| “Autonomous remediation” | Allow / Review / Block at the action boundary |
+
+Say: “Resolve’s $1B valuation proves the operations-agent market is real. Faultfix does not compete to be another investigator. It is the authority layer beneath every investigator.” [Resolve AI funding announcement](https://resolve.ai/news/resolveai-raises-125-million-series-a)
+
+The credibility anchors are OWASP’s excessive-agency guidance and DeepMind’s CaMeL direction: approval for state-changing actions, separation of untrusted retrieved data from control flow, and conventional policy enforcement around an LLM. [OWASP](https://owasp.org/www-project-top-10-for-large-language-model-applications/2_0_vulns/LLM06_ExcessiveAgency.html) · [CaMeL](https://arxiv.org/abs/2503.18813)
+
+**Roadmap sentence:** “Any agent, any tools—Faultfix becomes the MCP policy gateway that issues evidence-bound leases before production actions.”
+
 ## Two-minute run of show
 
-1. **Open with failure (15 seconds).** “An agent sees a DNS blip, follows an untrusted ticket, flushes production DNS globally, and doubles the outage. The problem is not that the agent was unintelligent. Nothing made it earn the right to act.”
+1. **Open with failure (15 seconds).** “An agent sees a DNS blip, follows an untrusted ticket, and proposes a global production change. The problem is not that the agent was unintelligent. Nothing made it earn the right to act.”
 2. **Run “block a hostile production command” (20 seconds).** Point out the hostile ticket, the `0` ticket bytes admitted to model context, and the permanent global action marked `BLOCK`. This is deterministic pre-inference enforcement, so it costs nothing and makes no model call.
 3. **Run the four-pack live challenge suite (30 seconds).** Say: “Now the live model works across capacity, DNS, identity, and insufficient-evidence cases. It suggests; Faultfix governs.” Highlight that the injection case is quarantined, while every answer is schema-validated.
 4. **Walk the INC-042 proof path (45 seconds).** Show the bounded reversible containment first. Then complete the evidence chain and regression. Emphasize that containment did not become a causal verdict or permanent fix.
