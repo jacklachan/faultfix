@@ -192,7 +192,7 @@ EVALUATION_PACKS = [
     },
     {
         "id": "dns-event",
-        "title": "02 / Actual DNS incident",
+        "title": "02 / DNS incident benchmark",
         "expected_hypothesis": "dns-event",
         "has_release_evidence": False,
         "evidence": [
@@ -718,7 +718,7 @@ def render_case_brief(case_id):
         if case["has_release_evidence"]
         else "Observe and collect trustworthy scope evidence before proposing containment."
     )
-    return f"""<section class='case-brief'><div><span class='brief-label'>SANITIZED INCIDENT PACK / {html.escape(case['id'].upper())}</span><h3>{html.escape(case['title'])}</h3><p>{len(case['evidence'])} bounded evidence facts. {html.escape(case['boundary'])}</p></div><div class='brief-scope'>{html.escape(scope)}</div></section>"""
+    return f"""<section class='case-brief'><div><span class='brief-label'>SIMULATED EVALUATION PACK / {html.escape(case['id'].upper())}</span><h3>{html.escape(case['title'])}</h3><p>{len(case['evidence'])} bounded evidence facts. {html.escape(case['boundary'])}</p></div><div class='brief-scope'>{html.escape(scope)}</div></section>"""
 
 
 HEAD = """
@@ -751,12 +751,12 @@ with gr.Blocks(title="faultfix | agent authority lab", css=CSS, head=HEAD) as de
         firewall_button = gr.Button("Run evidence firewall drill", elem_id="firewall")
     verdict = gr.HTML("<section class='result-placeholder' role='status' aria-live='polite'><b>ADVISORY RANKING / OPTIONAL</b><br>The small local model can prioritize a lead. It cannot unlock a fix.</section>", elem_id="ranking-result")
     public_pack_output = gr.HTML("<section class='result-placeholder' role='status' aria-live='polite'><b>EVIDENCE INSPECTION / READY</b><br>Open a public postmortem pack or inspect what the firewall excludes.</section>", elem_id="evidence-result")
-    gr.HTML("""<section class='section-heading'><div><span class='section-number'>03 / TEST A LIVE AGENT</span><h2 class='section-title'>The model may suggest. It never self-authorizes.</h2></div><p>Every live pack is sanitized and bounded. Faultfix independently decides the action authority.</p></section>""")
+    gr.HTML("""<section class='section-heading'><div><span class='section-number'>03 / TEST A LIVE AGENT</span><h2 class='section-title'>The model may suggest. It never self-authorizes.</h2></div><p>Every live pack is a simulated, sanitized evaluation fixture. Faultfix independently decides the action authority.</p></section>""")
     with gr.Row(equal_height=True):
         case_selector = gr.Dropdown(
             choices=[(case["title"], case["id"]) for case in EVALUATION_PACKS],
             value="pool-limit",
-            label="Choose a sanitized incident pack",
+            label="Choose a simulated incident benchmark",
             info="No raw untrusted content or post-cutoff facts are sent to the model.",
             scale=2,
         )
