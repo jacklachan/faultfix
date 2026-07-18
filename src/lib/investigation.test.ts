@@ -4,6 +4,8 @@ import {
   incidentReceipt,
   nextAction,
   nextEvidencePolicy,
+  POLICY_REPLAY,
+  POLICY_REWARD,
   proofCertificate,
   proofGate,
   remediationPlan,
@@ -66,6 +68,11 @@ describe("faultfix proof engine", () => {
         "regression",
       ]),
     ).toBeNull();
+  });
+  it("makes the policy tradeoff explicit: a quick guess cannot earn a safe change", () => {
+    expect(POLICY_REPLAY.guessFirst.verdict).toBe("Unsafe");
+    expect(POLICY_REPLAY.faultfix.links).toBe("5 / 5 causal links");
+    expect(POLICY_REWARD).toContain("counterfactual");
   });
   it("keeps the causal certificate incomplete until every proof link is evidenced", () => {
     const certificate = proofCertificate(["logs", "trace", "diff", "config"]);

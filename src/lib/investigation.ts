@@ -105,6 +105,36 @@ export function nextEvidencePolicy(completed: ActionId[]) {
   const action = nextAction(completed);
   return action ? { action, ...actionPolicy[action.id] } : null;
 }
+
+export const POLICY_REPLAY = {
+  guessFirst: {
+    name: "Guess-first agent",
+    subtitle: "Optimizes for a quick answer",
+    steps: [
+      "Sees the overlapping DNS event.",
+      "Treats timing as causation.",
+      "Proposes a DNS cache flush without a reproduction.",
+    ],
+    result: "Unsupported change proposed",
+    links: "0 / 5 causal links",
+    verdict: "Unsafe",
+  },
+  faultfix: {
+    name: "Faultfix policy",
+    subtitle: "Optimizes for a falsifiable answer",
+    steps: [
+      "Bounds the AZ-A symptom and affected request path.",
+      "Tests the r42 → pool-limit mechanism.",
+      "Eliminates DNS, then runs a counterfactual regression.",
+    ],
+    result: "Smallest reversible change packet",
+    links: "5 / 5 causal links",
+    verdict: "Scoped",
+  },
+} as const;
+
+export const POLICY_REWARD =
+  "evidence gain + alternative elimination + counterfactual proof − unsupported action";
 export function proofGate(completed: ActionId[]) {
   const has = (ids: ActionId[]) => ids.every((id) => completed.includes(id));
   const requirements = [

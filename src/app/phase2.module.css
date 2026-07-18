@@ -250,6 +250,115 @@
 .remediationBody {
   padding: 25px 5px 8px;
 }
+.replayBody {
+  padding: 25px 5px 8px;
+}
+.replayBody h2 {
+  margin: 10px 0;
+  color: #ebf7f2;
+  font-size: 29px;
+  line-height: 0.96;
+  letter-spacing: -0.07em;
+}
+.replayBody > p {
+  max-width: 560px;
+  color: #a8beb6;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.policyVersus {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 20px 0;
+}
+.policyVersus article {
+  border: 1px solid #4a3930;
+  background: #18100e;
+  padding: 13px;
+}
+.policyVersus article.faultfixPolicy {
+  border-color: #3d9e7e;
+  background: #0b1d1b;
+}
+.policyVersus article > div:first-child span {
+  display: block;
+  color: #b78968;
+  font: 9px var(--font-geist-mono);
+  letter-spacing: 0.06em;
+}
+.policyVersus article.faultfixPolicy > div:first-child span {
+  color: #71d9b7;
+}
+.policyVersus article > div:first-child b {
+  display: block;
+  margin-top: 7px;
+  color: #f5eee9;
+  font-size: 15px;
+  letter-spacing: -0.04em;
+}
+.policyVersus ol {
+  display: grid;
+  gap: 9px;
+  margin: 16px 0;
+  padding-left: 18px;
+  color: #cbb9af;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.policyVersus .faultfixPolicy ol {
+  color: #b8d7cd;
+}
+.policyResult {
+  border-top: 1px solid #4b3429;
+  padding-top: 10px;
+}
+.faultfixPolicy .policyResult {
+  border-color: #285648;
+}
+.policyResult span,
+.policyResult em {
+  display: block;
+  font: 9px var(--font-geist-mono);
+  letter-spacing: 0.07em;
+}
+.policyResult span {
+  color: #d89968;
+}
+.faultfixPolicy .policyResult span {
+  color: #71d9b7;
+}
+.policyResult b {
+  display: block;
+  margin: 5px 0;
+  color: #f4e1d4;
+  font-size: 11px;
+}
+.faultfixPolicy .policyResult b {
+  color: #e6f8f0;
+}
+.policyResult em {
+  color: #ef8378;
+  font-style: normal;
+}
+.faultfixPolicy .policyResult em {
+  color: #7ce1bd;
+}
+.rewardFormula {
+  border: 1px dashed #3d685d;
+  background: #071514;
+  padding: 11px;
+}
+.rewardFormula b {
+  color: #79d9b8;
+  font: 9px var(--font-geist-mono);
+  letter-spacing: 0.07em;
+}
+.rewardFormula p {
+  margin: 6px 0 0;
+  color: #c4d9d1;
+  font: 11px/1.5 var(--font-geist-mono);
+}
 .packetHeadline {
   display: flex;
   justify-content: space-between;
@@ -382,6 +491,9 @@
   }
   .packetHeadline {
     display: block;
+  }
+  .policyVersus {
+    grid-template-columns: 1fr;
   }
   .reversible {
     display: inline-block;

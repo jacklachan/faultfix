@@ -7,6 +7,8 @@ import {
   initialInvestigation,
   nextAction,
   nextEvidencePolicy,
+  POLICY_REPLAY,
+  POLICY_REWARD,
   proofCertificate,
   proofGate,
   remediationPlan,
@@ -25,6 +27,7 @@ export default function Home() {
   const [showReceipt, setShowReceipt] = useState(false);
   const [showCertificate, setShowCertificate] = useState(false);
   const [showRemediation, setShowRemediation] = useState(false);
+  const [showReplay, setShowReplay] = useState(false);
   const [showChallenge, setShowChallenge] = useState(false);
   const [localRanking, setLocalRanking] = useState<RankingResult | null>(null);
   const [isCheckingLocalRanking, setIsCheckingLocalRanking] = useState(false);
@@ -59,6 +62,7 @@ export default function Home() {
       setShowReceipt(false);
       setShowCertificate(false);
       setShowRemediation(false);
+      setShowReplay(false);
       setShowChallenge(false);
     }
     window.addEventListener("keydown", closeOnEscape);
@@ -118,6 +122,7 @@ export default function Home() {
     setShowReceipt(false);
     setShowCertificate(false);
     setShowRemediation(false);
+    setShowReplay(false);
     setShowChallenge(false);
   }
   function exportReceipt() {
@@ -140,6 +145,12 @@ export default function Home() {
         <div className={styles.headerSignal}>
           <i /> PROOF PROTOCOL v1.0
         </div>
+        <button
+          className={styles.policyButton}
+          onClick={() => setShowReplay(true)}
+        >
+          COMPARE POLICIES ↗
+        </button>
         <div className={styles.simulated}>SIMULATED / SAFE TO EXPLORE</div>
         <div className={styles.clock}>
           INCIDENT CLOCK <b>00:42:17</b>
@@ -458,6 +469,76 @@ export default function Home() {
             within 300ms{"\n"}
             <span className={styles.dim}> causal regression protected</span>
           </pre>
+        </section>
+      )}
+      {showReplay && (
+        <section
+          className={phase2.modal}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Policy replay"
+        >
+          <div className={phase2.modalHeader}>
+            <span>POLICY REPLAY / SAME INCIDENT, DIFFERENT DECISIONS</span>
+            <button
+              aria-label="Close policy replay"
+              onClick={() => setShowReplay(false)}
+            >
+              x
+            </button>
+          </div>
+          <div className={phase2.replayBody}>
+            <span className={phase2.rejectedTag}>
+              FAULTFIX IS NOT A BETTER GUESSER
+            </span>
+            <h2>
+              One policy guesses.
+              <br />
+              One earns the right to act.
+            </h2>
+            <p>
+              Both agents receive the same incident brief. The difference is
+              what their policy rewards: speed to an answer, or evidence that
+              can survive challenge.
+            </p>
+            <div className={phase2.policyVersus}>
+              {Object.values(POLICY_REPLAY).map((policy, index) => (
+                <article
+                  key={policy.name}
+                  className={
+                    index === 0 ? phase2.guessPolicy : phase2.faultfixPolicy
+                  }
+                >
+                  <div>
+                    <span>
+                      0{index + 1} / {policy.subtitle.toUpperCase()}
+                    </span>
+                    <b>{policy.name}</b>
+                  </div>
+                  <ol>
+                    {policy.steps.map((step) => (
+                      <li key={step}>{step}</li>
+                    ))}
+                  </ol>
+                  <div className={phase2.policyResult}>
+                    <span>{policy.links}</span>
+                    <b>{policy.result}</b>
+                    <em>{policy.verdict}</em>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <div className={phase2.rewardFormula}>
+              <b>POLICY REWARD</b>
+              <p>{POLICY_REWARD}</p>
+            </div>
+            <button
+              className={phase2.modalClose}
+              onClick={() => setShowReplay(false)}
+            >
+              Investigate with Faultfix
+            </button>
+          </div>
         </section>
       )}
       {showChallenge && (

@@ -22,7 +22,7 @@
 .header {
   height: 62px;
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: 1fr auto auto auto auto;
   align-items: center;
   border-bottom: 1px solid var(--line);
   font: 10px var(--font-geist-mono);
@@ -54,6 +54,18 @@
   border-radius: 50%;
   background: var(--mint);
   box-shadow: 0 0 14px #6fe1bd;
+}
+.policyButton {
+  border: 0;
+  background: transparent;
+  color: #b8dcd0;
+  padding: 5px 10px;
+  font: 9px var(--font-geist-mono);
+  letter-spacing: 0.07em;
+  cursor: pointer;
+}
+.policyButton:hover {
+  color: #ffbf70;
 }
 .simulated {
   justify-self: center;
