@@ -1,1 +1,222 @@
-.modal{position:fixed;z-index:5;top:50%;left:50%;transform:translate(-50%,-50%);width:min(670px,calc(100vw - 34px));background:#071012;border:1px solid #325148;box-shadow:0 20px 70px #000;padding:15px}.modalHeader{display:flex;justify-content:space-between;color:#78a99b;font:10px var(--font-geist-mono);padding-bottom:10px;border-bottom:1px solid #1f3732}.modalHeader button{border:0;background:transparent;color:#bcd0ca;font-size:17px;cursor:pointer}.challengeBody,.receiptBody{padding:25px 5px 8px;position:relative}.challengeBody h2,.receiptBody h2{color:#e2ece7;font-size:23px;letter-spacing:-.04em;margin:12px 0}.challengeBody>p,.receiptBody>p{color:#9cada7;line-height:1.6;font-size:13px;max-width:525px}.rejectedTag{font:10px var(--font-geist-mono);letter-spacing:.09em;color:#efad7b}.challengeBody dl,.receiptBody dl{margin-top:22px;border-top:1px solid #203136}.challengeBody dl div,.receiptBody dl div{display:grid;grid-template-columns:170px 1fr;gap:12px;border-bottom:1px solid #203136;padding:12px 0}.challengeBody dt,.receiptBody dt{font:9px var(--font-geist-mono);color:#73958a}.challengeBody dd,.receiptBody dd{color:#c4d0cb;font-size:12px;line-height:1.45;margin:0}.modalClose{border:1px solid #548c7b;background:#d2e6de;color:#0b1715;padding:10px 13px;margin-top:20px;cursor:pointer;font-size:12px;font-weight:700}.receiptStamp{position:absolute;right:7px;top:18px;transform:rotate(8deg);border:2px solid #62c6a5;color:#62c6a5;padding:6px;font:12px/1 var(--font-geist-mono);text-align:center;opacity:.8}.receiptActions{display:flex;align-items:end;gap:16px}.textButton{border:0;background:transparent;color:#aad3c5;padding:0;cursor:pointer;font-size:12px}@media(max-width:620px){.challengeBody dl div,.receiptBody dl div{grid-template-columns:1fr}.receiptStamp{position:static;display:inline-block;margin-bottom:14px}.receiptActions{display:block}.textButton{display:block;margin-top:14px}}
+.modal {
+  position: fixed;
+  z-index: 5;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(670px, calc(100vw - 34px));
+  background: #071012;
+  border: 1px solid #325148;
+  box-shadow: 0 20px 70px #000;
+  padding: 15px;
+}
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  color: #78a99b;
+  font: 10px var(--font-geist-mono);
+  padding-bottom: 10px;
+  border-bottom: 1px solid #1f3732;
+}
+.modalHeader button {
+  border: 0;
+  background: transparent;
+  color: #bcd0ca;
+  font-size: 17px;
+  cursor: pointer;
+}
+.challengeBody,
+.receiptBody {
+  padding: 25px 5px 8px;
+  position: relative;
+}
+.challengeBody h2,
+.receiptBody h2 {
+  color: #e2ece7;
+  font-size: 23px;
+  letter-spacing: -0.04em;
+  margin: 12px 0;
+}
+.challengeBody > p,
+.receiptBody > p {
+  color: #9cada7;
+  line-height: 1.6;
+  font-size: 13px;
+  max-width: 525px;
+}
+.rejectedTag {
+  font: 10px var(--font-geist-mono);
+  letter-spacing: 0.09em;
+  color: #efad7b;
+}
+.challengeBody dl,
+.receiptBody dl {
+  margin-top: 22px;
+  border-top: 1px solid #203136;
+}
+.challengeBody dl div,
+.receiptBody dl div {
+  display: grid;
+  grid-template-columns: 170px 1fr;
+  gap: 12px;
+  border-bottom: 1px solid #203136;
+  padding: 12px 0;
+}
+.challengeBody dt,
+.receiptBody dt {
+  font: 9px var(--font-geist-mono);
+  color: #73958a;
+}
+.challengeBody dd,
+.receiptBody dd {
+  color: #c4d0cb;
+  font-size: 12px;
+  line-height: 1.45;
+  margin: 0;
+}
+.modalClose {
+  border: 1px solid #548c7b;
+  background: #d2e6de;
+  color: #0b1715;
+  padding: 10px 13px;
+  margin-top: 20px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+.receiptStamp {
+  position: absolute;
+  right: 7px;
+  top: 18px;
+  transform: rotate(8deg);
+  border: 2px solid #62c6a5;
+  color: #62c6a5;
+  padding: 6px;
+  font: 12px/1 var(--font-geist-mono);
+  text-align: center;
+  opacity: 0.8;
+}
+.receiptActions {
+  display: flex;
+  align-items: end;
+  gap: 16px;
+}
+
+.certificateBody {
+  padding: 25px 5px 8px;
+}
+
+.certificateBody h2 {
+  color: #e2ece7;
+  font-size: 28px;
+  letter-spacing: -0.06em;
+  margin: 12px 0;
+}
+
+.certificateBody > p {
+  color: #9cada7;
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 570px;
+}
+
+.certificateLinks {
+  display: grid;
+  gap: 8px;
+  margin: 22px 0;
+}
+
+.certificateLink {
+  display: grid;
+  grid-template-columns: 35px 1fr;
+  gap: 12px;
+  border: 1px solid #24423e;
+  background: linear-gradient(110deg, #0a1f1de6, #050f10e6);
+  padding: 13px;
+}
+
+.certificateLink > span {
+  color: #68807c;
+  font: 700 10px var(--font-geist-mono);
+}
+.certificateLink b {
+  color: #f1fbf7;
+}
+.certificateLink p {
+  margin: 4px 0 7px;
+  color: #a4bcb6;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.certificateLink small {
+  color: #e7a153;
+  font: 700 9px var(--font-geist-mono);
+  letter-spacing: 0.06em;
+}
+.certificateLink.verified {
+  border-color: #3b907b;
+  box-shadow: inset 3px 0 #5ee0bd;
+}
+.certificateLink.verified > span,
+.certificateLink.verified small {
+  color: #5ee0bd;
+}
+
+.counterfactual {
+  border: 1px solid #d46a2b;
+  background: #25130c;
+  padding: 13px;
+}
+.counterfactual b {
+  color: #ff9b5c;
+  font: 700 9px var(--font-geist-mono);
+  letter-spacing: 0.08em;
+}
+.counterfactual p {
+  margin: 6px 0 0;
+  color: #fff1e9;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.certificateFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 20px;
+  color: #6f9690;
+  font: 700 9px var(--font-geist-mono);
+  letter-spacing: 0.06em;
+}
+.textButton {
+  border: 0;
+  background: transparent;
+  color: #aad3c5;
+  padding: 0;
+  cursor: pointer;
+  font-size: 12px;
+}
+@media (max-width: 620px) {
+  .challengeBody dl div,
+  .receiptBody dl div {
+    grid-template-columns: 1fr;
+  }
+  .receiptStamp {
+    position: static;
+    display: inline-block;
+    margin-bottom: 14px;
+  }
+  .receiptActions {
+    display: block;
+  }
+  .textButton {
+    display: block;
+    margin-top: 14px;
+  }
+
+  .certificateFoot {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
