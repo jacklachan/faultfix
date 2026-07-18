@@ -102,8 +102,13 @@ def rank_hypotheses(hypotheses_json):
         f"from this list: {fallback}. Hypotheses: {json.dumps(hypotheses)}"
     )
     try:
-        result = ranker()(prompt, max_new_tokens=12, do_sample=False)[0]["generated_text"].lower()
-        first = next((hypothesis_id for hypothesis_id in fallback if hypothesis_id in result), None)
+        result = ranker()(prompt, max_new_tokens=12, do_sample=False)[0]["generated_text"]
+        # The ranking prompt requires one ID. Accept only that exact answer
+        # (with harmless surrounding punctuation), never a substring from a
+        # longer or ambiguous model response.
+        first = str(result).strip().lower().strip("`'\".,;:!?()[]{}")
+        if first not in fallback:
+            first = None
         if first:
             candidate = [first, *[hypothesis_id for hypothesis_id in fallback if hypothesis_id != first]]
             return {
