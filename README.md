@@ -1,6 +1,6 @@
 # faultfix
 
-faultfix is an evidence-first incident investigator for the distinction on-call teams actually need: **contain impact now** with a bounded, reversible action; **make a permanent change later** only after the causal case and a reproduction are recorded. A plausible hypothesis never becomes a root-cause verdict or permanent fix by itself.
+faultfix is the authority layer that makes AI agents earn the right to act in incident response: **contain impact now** only with a bounded, reversible action; **make a permanent change later** only after the causal case and a reproduction are recorded. A plausible hypothesis never becomes a root-cause verdict or permanent fix by itself.
 
 This is a self-contained product demo. The payments incident, evidence sources, causal graph, regression result, containment packet, and prevention guardrail are deterministic and bundled in the app. No production systems, credentials, or API keys are required.
 
