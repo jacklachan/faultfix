@@ -22,7 +22,7 @@
 .header {
   height: 62px;
   display: grid;
-  grid-template-columns: 1fr auto auto auto auto auto;
+  grid-template-columns: 1fr auto auto auto auto auto auto;
   align-items: center;
   border-bottom: 1px solid var(--line);
   font: 10px var(--font-geist-mono);
@@ -79,6 +79,19 @@
 .agentButton:hover {
   border-color: #ffba69;
   color: #ffcf92;
+}
+.firewallButton {
+  border: 1px solid rgba(255, 183, 93, 0.48);
+  background: rgba(91, 53, 18, 0.16);
+  color: #ffd190;
+  padding: 6px 9px;
+  font: 9px var(--font-geist-mono);
+  letter-spacing: 0.07em;
+  cursor: pointer;
+}
+.firewallButton:hover {
+  border-color: #79e6c1;
+  color: #a7f2d4;
 }
 .simulated {
   justify-self: center;
@@ -767,6 +780,7 @@
   }
   .headerSignal,
   .policyButton,
+  .firewallButton,
   .clock {
     display: none;
   }

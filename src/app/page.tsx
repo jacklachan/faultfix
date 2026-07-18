@@ -20,6 +20,13 @@ import {
 import { type RankingResult } from "@/lib/local-ranking";
 import { rankHypothesesWithHostedSpace } from "@/lib/hosted-ranking";
 import { BASELINE_AGENT_SCORE, baselineAgentRun } from "@/lib/agent-lab";
+import {
+  FIREWALL_DEMO_ARTIFACTS,
+  FIREWALL_DEMO_CUTOFF,
+  canSupportPermanentDecision,
+  evidenceFirewallReceipt,
+  screenEvidence,
+} from "@/lib/evidence-firewall";
 import styles from "./page.module.css";
 import phase2 from "./phase2.module.css";
 import local from "./local-ranking.module.css";
@@ -35,6 +42,7 @@ export default function Home() {
   const [containmentApplied, setContainmentApplied] = useState(false);
   const [showReplay, setShowReplay] = useState(false);
   const [showAgentLab, setShowAgentLab] = useState(false);
+  const [showEvidenceFirewall, setShowEvidenceFirewall] = useState(false);
   const [agentRunStep, setAgentRunStep] = useState(0);
   const [isAgentRunPlaying, setIsAgentRunPlaying] = useState(false);
   const [showGuardrail, setShowGuardrail] = useState(false);
@@ -79,6 +87,21 @@ export default function Home() {
   );
   const evidence = investigation.completed.map(actionResult);
   const agentRun = useMemo(() => baselineAgentRun(), []);
+  const firewallScreen = useMemo(
+    () =>
+      FIREWALL_DEMO_ARTIFACTS.map((artifact) =>
+        screenEvidence(artifact, FIREWALL_DEMO_CUTOFF),
+      ),
+    [],
+  );
+  const firewallReceipt = useMemo(
+    () => evidenceFirewallReceipt(FIREWALL_DEMO_ARTIFACTS, FIREWALL_DEMO_CUTOFF),
+    [],
+  );
+  const permanentEvidence = useMemo(
+    () => canSupportPermanentDecision(firewallScreen),
+    [firewallScreen],
+  );
   const agentRunActive =
     isAgentRunPlaying && agentRunStep < agentRun.length;
   useEffect(() => {
@@ -91,6 +114,7 @@ export default function Home() {
       setShowContainment(false);
       setShowReplay(false);
       setShowAgentLab(false);
+      setShowEvidenceFirewall(false);
       setIsAgentRunPlaying(false);
       setShowGuardrail(false);
       setShowChallenge(false);
@@ -163,6 +187,7 @@ export default function Home() {
     setContainmentApplied(false);
     setShowReplay(false);
     setShowAgentLab(false);
+    setShowEvidenceFirewall(false);
     setIsAgentRunPlaying(false);
     setAgentRunStep(0);
     setShowGuardrail(false);
@@ -200,6 +225,12 @@ export default function Home() {
           onClick={() => setShowAgentLab(true)}
         >
           RUN AGENT LAB
+        </button>
+        <button
+          className={styles.firewallButton}
+          onClick={() => setShowEvidenceFirewall(true)}
+        >
+          EVIDENCE FIREWALL
         </button>
         <div className={styles.simulated}>SIMULATED / SAFE TO EXPLORE</div>
         <div className={styles.clock}>
@@ -623,6 +654,79 @@ export default function Home() {
             >
               Investigate with Faultfix
             </button>
+          </div>
+        </section>
+      )}
+      {showEvidenceFirewall && (
+        <section
+          className={`${phase2.modal} ${phase2.firewallModal}`}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Faultfix evidence firewall"
+        >
+          <div className={phase2.modalHeader}>
+            <span>EVIDENCE FIREWALL / REPLAY FF-042</span>
+            <button
+              aria-label="Close evidence firewall"
+              onClick={() => setShowEvidenceFirewall(false)}
+            >
+              x
+            </button>
+          </div>
+          <div className={phase2.firewallBody}>
+            <span className={phase2.rejectedTag}>PRE-MODEL TRUST GATE</span>
+            <h2>Inspect the evidence before the agent can.</h2>
+            <p>
+              Faultfix filters raw operational content before it enters an agent
+              context. This prevents hostile instructions and future knowledge
+              from becoming causal proof or action authority.
+            </p>
+            <div className={phase2.firewallMeta}>
+              <div>
+                <span>REPLAY CUTOFF</span>
+                <b>{FIREWALL_DEMO_CUTOFF.replace("T", " ").replace("Z", " UTC")}</b>
+              </div>
+              <div>
+                <span>POLICY</span>
+                <b>{firewallReceipt.policyVersion}</b>
+              </div>
+              <div>
+                <span>PACK HASH</span>
+                <b>CONTENT {firewallReceipt.evidenceFingerprint}</b>
+              </div>
+            </div>
+            <div className={phase2.firewallTrace}>
+              {firewallScreen.map((artifact) => (
+                <article
+                  key={artifact.id}
+                  className={phase2[`firewall${artifact.disposition}`]}
+                >
+                  <div>
+                    <span>{artifact.trust.replace(/-/g, " ")}</span>
+                    <b>{artifact.label}</b>
+                    <small>CONTENT {artifact.fingerprint}</small>
+                  </div>
+                  <p>{artifact.reason}</p>
+                  <em>{artifact.disposition}</em>
+                </article>
+              ))}
+            </div>
+            <section className={phase2.influenceMap}>
+              <span>INFLUENCE MAP</span>
+              <p>
+                r42 deploy diff + AZ-A telemetry <i>→</i> reversible containment
+                <i>→</i> <b>human review</b>
+              </p>
+              <p>
+                quarantined ticket + future regression <i>→</i> permanent change
+                <i>→</i> <b>blocked from influence</b>
+              </p>
+            </section>
+            <p className={phase2.noExecution}>
+              {permanentEvidence.reason} The causal proof gate is separate and
+              still required. Raw quarantined text is never displayed to or used
+              by a model in this replay.
+            </p>
           </div>
         </section>
       )}

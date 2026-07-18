@@ -44,6 +44,12 @@ The proof gate is complete only when all four checks are met: direct symptom evi
 
 The authority engine is shared policy, not model output. Once `OPENAI_API_KEY` is configured as a server-side Hugging Face Space secret, the live investigator will select the actions while Faultfix continues to determine whether each one is allowed, reviewed, or blocked.
 
+## Evidence Firewall
+
+Before an agent receives an evidence pack, Faultfix applies a separate **Evidence Firewall**. Each artifact carries a stable content fingerprint, source trust class, and observation time. The firewall admits normalized records from trusted sources, quarantines untrusted or instruction-like material so its raw text cannot become model context, and excludes any fact that appeared after the replay cutoff. It then produces a small policy receipt with the evidence-pack fingerprint, admitted artifacts, and excluded artifacts.
+
+This prevents two common ways an incident demo can become unsafe or misleading: a hostile string in a log/ticket influencing the agent, and a model benefiting from facts that were unavailable at the moment of the decision. The firewall is additive: passing it does not prove causality and cannot unlock a permanent change. Faultfix still requires the independent causal proof gate and human review.
+
 ## Judge demo script (2-3 minutes)
 
 1. Start the investigation and point out that permanent fixes are locked while the proof gate is empty.

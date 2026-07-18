@@ -92,6 +92,21 @@ PUBLIC_EVIDENCE_FINGERPRINT = hashlib.sha256(
     json.dumps(PUBLIC_EVIDENCE_PACK, sort_keys=True).encode("utf-8")
 ).hexdigest()[:12].upper()
 
+FIREWALL_DRILL = {
+    "id": "FF-FIREWALL-042",
+    "replay_cutoff": "14:12 UTC",
+    "policy": "faultfix-evidence-firewall/v1",
+    "artifacts": [
+        ("r42 deploy diff", "first-party telemetry", "ADMIT", "Observed before cutoff. Normalized configuration fact may enter the model context."),
+        ("AZ-A connection telemetry", "first-party telemetry", "ADMIT", "Observed before cutoff. Normalized symptom fact may enter the model context."),
+        ("external support-ticket body", "untrusted", "QUARANTINE", "Simulated instruction-like content is removed before the model context is constructed."),
+        ("regression result", "first-party telemetry", "FUTURE", "Observed after this replay cutoff. Excluded to prevent hindsight leakage."),
+    ],
+}
+FIREWALL_FINGERPRINT = hashlib.sha256(
+    json.dumps(FIREWALL_DRILL, sort_keys=True).encode("utf-8")
+).hexdigest()[:12].upper()
+
 CSS = """
 :root { --void:#060d0f; --panel:#0b181a; --panel2:#102326; --line:#28484b; --mint:#78e4bd; --amber:#ffc26a; --ink:#edf8f3; --fog:#acc2b9; --muted:#78938a; --danger:#ef8176; }
 body { background:var(--void)!important; }
@@ -116,6 +131,10 @@ CSS += """
 #public-pack button { min-height:42px!important; border:1px dashed #49726a!important; background:transparent!important; color:#a7d5c4!important; font-size:11px!important; font-weight:700!important; }.public-pack { margin-top:18px; border:1px solid #54796f; background:linear-gradient(135deg,rgba(12,48,44,.75),rgba(8,16,19,.97)); padding:23px; }.public-pack .pack-top { display:flex; justify-content:space-between; gap:18px; align-items:start; }.public-pack .source { color:#80d9b6; font:700 10px ui-monospace,SFMono-Regular,monospace; letter-spacing:.11em; }.public-pack h2 { margin:9px 0; color:#eef9f4; font-size:27px; letter-spacing:-.05em; }.public-pack .summary { max-width:670px; color:#b4cac1; font-size:13px; line-height:1.5; }.public-pack .fingerprint { border:1px solid #41645d; padding:7px; color:#8bb9a8; font:9px ui-monospace,SFMono-Regular,monospace; letter-spacing:.06em; white-space:nowrap; }.public-pack .artifact { display:grid; grid-template-columns:138px 1fr; gap:14px; padding:11px 0; border-bottom:1px solid #29473f; }.public-pack .artifact b { color:#f3c178; font:9px ui-monospace,SFMono-Regular,monospace; letter-spacing:.08em; }.public-pack .artifact p { margin:0; color:#d0e2da; font-size:12px; line-height:1.45; }.public-pack .limit { margin:15px 0 0; border-left:2px solid #e6a354; padding:9px 11px; color:#f1d5b7; background:#21170e; font-size:11px; line-height:1.45; }.public-pack a { color:#8be2c0; } @media (max-width:620px) { .public-pack .pack-top { display:block; }.public-pack .fingerprint { display:inline-block; margin-top:12px; }.public-pack .artifact { grid-template-columns:1fr; gap:6px; } }
 """
 
+CSS += """
+#firewall button { min-height:42px!important; border:1px solid #a56f3f!important; background:#21170f!important; color:#ffd297!important; font-size:11px!important; font-weight:700!important; }.firewall { margin-top:18px; border:1px solid #5f7f72; background:linear-gradient(135deg,rgba(17,47,42,.8),rgba(8,15,18,.98)); padding:23px; }.firewall .firewall-top { display:flex; justify-content:space-between; gap:18px; align-items:start; }.firewall .source { color:#82dfbb; font:700 10px ui-monospace,SFMono-Regular,monospace; letter-spacing:.11em; }.firewall h2 { margin:9px 0; color:#eefaf4; font-size:27px; letter-spacing:-.05em; }.firewall .summary { max-width:690px; color:#b5ccc2; font-size:13px; line-height:1.5; }.firewall .fingerprint { border:1px solid #48675e; padding:7px; color:#9cc9b8; font:9px ui-monospace,SFMono-Regular,monospace; letter-spacing:.06em; white-space:nowrap; }.firewall .artifact { display:grid; grid-template-columns:165px 1fr 88px; align-items:center; gap:14px; padding:11px 0; border-bottom:1px solid #29473f; }.firewall .artifact:last-child { border:0; }.firewall .artifact .label { color:#eff9f4; font-size:12px; font-weight:700; }.firewall .artifact .trust { display:block; margin-top:5px; color:#7da99a; font:9px ui-monospace,SFMono-Regular,monospace; text-transform:uppercase; letter-spacing:.07em; }.firewall .artifact p { margin:0; color:#bfd3ca; font-size:11px; line-height:1.45; }.firewall .artifact em { justify-self:end; border:1px solid currentColor; padding:4px 5px; color:#77dfba; font:9px ui-monospace,SFMono-Regular,monospace; letter-spacing:.06em; font-style:normal; }.firewall .quarantine { background:#1b110f; box-shadow:inset 3px 0 #ee8173; }.firewall .quarantine em { color:#fa9388; }.firewall .future { background:#1d190f; box-shadow:inset 3px 0 #e6a458; }.firewall .future em { color:#f7bc70; }.firewall .influence { margin-top:14px; border:1px dashed #3d685d; padding:11px; color:#c6d9d1; font-size:11px; line-height:1.6; }.firewall .influence b { color:#7ae0bd; font:9px ui-monospace,SFMono-Regular,monospace; letter-spacing:.07em; }.firewall .influence i { color:#f4b36d; padding:0 5px; font-style:normal; }.firewall .boundary { margin:13px 0 0; color:#e9c18f; font-size:11px; line-height:1.45; } @media (max-width:620px) { .firewall .firewall-top { display:block; }.firewall .fingerprint { display:inline-block; margin-top:12px; }.firewall .artifact { grid-template-columns:1fr; gap:7px; }.firewall .artifact em { justify-self:start; } }
+"""
+
 def render_verdict():
     result = rank_hypotheses(DEFAULT_HYPOTHESES_JSON)
     top = result["rankedIds"][0] if result["rankedIds"] else "pool-limit"
@@ -136,6 +155,14 @@ def render_public_evidence_pack():
     return f"""<section class='public-pack'><div class='pack-top'><div><div class='source'>PUBLIC EVIDENCE PACK / READ-ONLY</div><h2>{PUBLIC_EVIDENCE_PACK['title']}</h2><p class='summary'>{PUBLIC_EVIDENCE_PACK['provenance']}</p></div><div class='fingerprint'>PACK {PUBLIC_EVIDENCE_PACK['id']}<br>SHA-256 {PUBLIC_EVIDENCE_FINGERPRINT}</div></div>{rows}<p class='limit'><b>BOUNDARY:</b> {PUBLIC_EVIDENCE_PACK['limits']} <a href='{PUBLIC_EVIDENCE_PACK['url']}' target='_blank' rel='noopener'>Read the original postmortem.</a></p></section>"""
 
 
+def render_evidence_firewall():
+    rows = "".join(
+        f"<div class='artifact {decision.lower()}'><div><b class='label'>{label}</b><span class='trust'>{trust}</span></div><p>{detail}</p><em>{decision}</em></div>"
+        for label, trust, decision, detail in FIREWALL_DRILL["artifacts"]
+    )
+    return f"""<section class='firewall'><div class='firewall-top'><div><div class='source'>EVIDENCE FIREWALL / SIMULATED SECURITY DRILL</div><h2>Inspect the evidence before the agent can.</h2><p class='summary'>Faultfix constructs a time-bounded, trusted evidence context before an agent can reason about an incident. Raw quarantined content never becomes model input or action authority.</p></div><div class='fingerprint'>PACK {FIREWALL_DRILL['id']}<br>SHA-256 {FIREWALL_FINGERPRINT}<br>AS OF {FIREWALL_DRILL['replay_cutoff']}</div></div>{rows}<div class='influence'><b>INFLUENCE MAP</b><br>r42 deploy diff + AZ-A telemetry <i>&rarr;</i> reversible containment <i>&rarr;</i> human review<br>quarantined ticket + future regression <i>&rarr;</i> permanent change <i>&rarr;</i> excluded from influence</div><p class='boundary'><b>BOUNDARY:</b> This is a deterministic safety drill, not a claim that a live attack was detected. The permanent causal proof gate remains separate and required.</p></section>"""
+
+
 with gr.Blocks(title="faultfix | agent authority lab", css=CSS) as demo:
     gr.HTML("""<header id='masthead'><div><div class='kicker'><span class='pulse'></span>FAULTFIX / PROOF-CARRYING OPERATIONS</div><h1>Prove the cause.<br><span class='emphasis'>Then earn the fix.</span></h1><p class='subtitle'>Faultfix closes the gap between what an AI agent wants to do, what the record supports, and what it is actually allowed to change.</p></div><aside class='matrix'><div class='matrix-head'><span>AUTHORITY MATRIX / INC-042</span><span>SIMULATED</span></div><div class='matrix-row'><span>Read evidence</span><b class='allow'>ALLOW</b></div><div class='matrix-row'><span>Contain customer impact</span><b class='review'>REVIEW</b></div><div class='matrix-row'><span>Permanent production change</span><b class='block'>BLOCKED</b></div><p class='matrix-note'>The agent never assigns its own permissions. Faultfix evaluates every decision against evidence and blast radius.</p></aside></header>""")
     gr.HTML("""<section class='spine'><div class='step'><small>RELEASE</small><b>r42 deployed</b></div><i>&rarr;</i><div class='step'><small>CONFIG</small><b>Pool 40 to 20</b></div><i>&rarr;</i><div class='step'><small>SERVICE</small><b>AZ-A exhausted</b></div><i>&rarr;</i><div class='step'><small>IMPACT</small><b>Payments time out</b></div></section>""")
@@ -145,12 +172,14 @@ with gr.Blocks(title="faultfix | agent authority lab", css=CSS) as demo:
         lab_button = gr.Button("Run authority trace", elem_id="agent-lab")
         run_button = gr.Button("Optional: rank hypotheses with model", elem_id="run-model")
     public_pack_button = gr.Button("Load real public evidence pack: Google Cloud GCE 2016", elem_id="public-pack")
+    firewall_button = gr.Button("Run evidence firewall drill: quarantine + replay cutoff", elem_id="firewall")
     lab_output = gr.HTML("<p class='footer-note'>RUN THE TRACE TO SEE FAULTFIX BLOCK, REVIEW, AND ALLOW AN AGENT'S DECISIONS</p>")
     verdict = gr.HTML()
     public_pack_output = gr.HTML()
     lab_button.click(render_agent_lab, inputs=None, outputs=lab_output, show_progress="minimal")
     run_button.click(render_verdict, inputs=None, outputs=verdict, show_progress="minimal")
     public_pack_button.click(render_public_evidence_pack, inputs=None, outputs=public_pack_output, show_progress="minimal")
+    firewall_button.click(render_evidence_firewall, inputs=None, outputs=public_pack_output, show_progress="minimal")
     gr.HTML("<p class='footer-note'>PUBLIC DEMO ENVIRONMENT · NO PRODUCTION INFRASTRUCTURE IS QUERIED · MODEL OUTPUT IS ADVISORY</p>")
 
     # Kept hidden so the companion web app can call the documented Gradio API without exposing raw JSON to judges.
