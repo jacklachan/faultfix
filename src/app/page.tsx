@@ -19,6 +19,7 @@ import {
 } from "@/lib/investigation";
 import { type RankingResult } from "@/lib/local-ranking";
 import { rankHypothesesWithHostedSpace } from "@/lib/hosted-ranking";
+import { BASELINE_AGENT_SCORE, baselineAgentRun } from "@/lib/agent-lab";
 import styles from "./page.module.css";
 import phase2 from "./phase2.module.css";
 import local from "./local-ranking.module.css";
@@ -33,6 +34,9 @@ export default function Home() {
   const [showContainment, setShowContainment] = useState(false);
   const [containmentApplied, setContainmentApplied] = useState(false);
   const [showReplay, setShowReplay] = useState(false);
+  const [showAgentLab, setShowAgentLab] = useState(false);
+  const [agentRunStep, setAgentRunStep] = useState(0);
+  const [isAgentRunPlaying, setIsAgentRunPlaying] = useState(false);
   const [showGuardrail, setShowGuardrail] = useState(false);
   const [candidatePoolLimit, setCandidatePoolLimit] = useState(20);
   const [showChallenge, setShowChallenge] = useState(false);
@@ -74,6 +78,9 @@ export default function Home() {
     [investigation.completed],
   );
   const evidence = investigation.completed.map(actionResult);
+  const agentRun = useMemo(() => baselineAgentRun(), []);
+  const agentRunActive =
+    isAgentRunPlaying && agentRunStep < agentRun.length;
   useEffect(() => {
     function closeOnEscape(event: KeyboardEvent) {
       if (event.key !== "Escape") return;
@@ -83,12 +90,21 @@ export default function Home() {
       setShowRemediation(false);
       setShowContainment(false);
       setShowReplay(false);
+      setShowAgentLab(false);
+      setIsAgentRunPlaying(false);
       setShowGuardrail(false);
       setShowChallenge(false);
     }
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
   }, []);
+  useEffect(() => {
+    if (!agentRunActive) return;
+    const timer = window.setTimeout(() => {
+      setAgentRunStep((step) => step + 1);
+    }, 760);
+    return () => window.clearTimeout(timer);
+  }, [agentRunActive]);
   function runAction(actionId: ActionId) {
     if (!investigation.completed.includes(actionId)) {
       setInvestigation({
@@ -146,6 +162,9 @@ export default function Home() {
     setShowContainment(false);
     setContainmentApplied(false);
     setShowReplay(false);
+    setShowAgentLab(false);
+    setIsAgentRunPlaying(false);
+    setAgentRunStep(0);
     setShowGuardrail(false);
     setCandidatePoolLimit(20);
     setShowChallenge(false);
@@ -175,6 +194,12 @@ export default function Home() {
           onClick={() => setShowReplay(true)}
         >
           COMPARE POLICIES ↗
+        </button>
+        <button
+          className={styles.agentButton}
+          onClick={() => setShowAgentLab(true)}
+        >
+          RUN AGENT LAB
         </button>
         <div className={styles.simulated}>SIMULATED / SAFE TO EXPLORE</div>
         <div className={styles.clock}>
@@ -598,6 +623,102 @@ export default function Home() {
             >
               Investigate with Faultfix
             </button>
+          </div>
+        </section>
+      )}
+      {showAgentLab && (
+        <section
+          className={`${phase2.modal} ${phase2.labModal}`}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Faultfix agent safety lab"
+        >
+          <div className={phase2.modalHeader}>
+            <span>FAULTFIX AGENT LAB / INC-042</span>
+            <button
+              aria-label="Close agent lab"
+              onClick={() => {
+                setShowAgentLab(false);
+                setIsAgentRunPlaying(false);
+              }}
+            >
+              x
+            </button>
+          </div>
+          <div className={phase2.labBody}>
+            <div className={phase2.labIntro}>
+              <div>
+                <span className={phase2.rejectedTag}>
+                  DECISION-TRACE EVALUATION
+                </span>
+                <h2>Did the agent earn the right to act?</h2>
+                <p>
+                  Faultfix evaluates the whole trajectory: evidence collection,
+                  claim calibration, containment authority, and permanent-change
+                  safety. A correct answer alone is not a pass.
+                </p>
+              </div>
+              <div className={phase2.baselineBadge}>
+                <b>BASELINE</b>
+                <span>Scripted / no model key</span>
+              </div>
+            </div>
+            <div className={phase2.labControls}>
+              <div>
+                <span>RUN MODE</span>
+                <b>Deterministic policy replay</b>
+              </div>
+              <button
+                className={phase2.modalClose}
+                disabled={agentRunActive}
+                onClick={() => {
+                  setAgentRunStep(0);
+                  setIsAgentRunPlaying(true);
+                }}
+              >
+                {agentRunActive
+                  ? "Evaluating trace..."
+                  : agentRunStep >= agentRun.length
+                    ? "Replay baseline"
+                    : "Run baseline"}
+              </button>
+            </div>
+            <div className={phase2.agentTrace} aria-live="polite">
+              {agentRun.slice(0, agentRunStep).map((event, index) => (
+                <article
+                  key={event.id}
+                  className={`${phase2.agentEvent} ${phase2[`authority${event.authority}`]}`}
+                >
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <div>
+                    <b>{event.title}</b>
+                    <p>{event.detail}</p>
+                    <small>{event.authorityReason}</small>
+                  </div>
+                  <em>{event.authority}</em>
+                </article>
+              ))}
+              {!agentRunStep && (
+                <p className={phase2.labEmpty}>
+                  Run the baseline to inspect the evidence and authority trace.
+                </p>
+              )}
+            </div>
+            {agentRunStep >= agentRun.length && (
+              <div className={phase2.agentScore}>
+                {Object.entries(BASELINE_AGENT_SCORE).map(([label, value]) => (
+                  <div key={label}>
+                    <span>{label.replace(/([A-Z])/g, " $1")}</span>
+                    <b>{value}</b>
+                  </div>
+                ))}
+              </div>
+            )}
+            <p className={phase2.noExecution}>
+              This run is deterministic until an OpenAI key is configured. The
+              same authority policy will wrap the hosted investigator; a model
+              will never grant itself write authority.
+            </p>
           </div>
         </section>
       )}

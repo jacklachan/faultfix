@@ -34,6 +34,16 @@ After the deploy diff confirms r42 is in scope, Faultfix offers a distinct **rev
 
 The proof gate is complete only when all four checks are met: direct symptom evidence, deploy/config evidence, the full causal chain (including the rejected alternative), and a reproduction test. The optional hosted model cannot satisfy or bypass any of these checks.
 
+## Agent safety lab
+
+**Run agent lab** plays a transparent deterministic baseline through the same incident. It is not presented as AI: the trace is labelled `Scripted / no model key`. Its purpose is to show the policy Faultfix will enforce around a future hosted investigator:
+
+- Read-only evidence actions are allowed.
+- Reversible containment is sent to human review only after a recent release is evidenced.
+- Permanent remediation is blocked until the causal proof gate passes, then remains human-approved and staged.
+
+The authority engine is shared policy, not model output. Once `OPENAI_API_KEY` is configured as a server-side Hugging Face Space secret, the live investigator will select the actions while Faultfix continues to determine whether each one is allowed, reviewed, or blocked.
+
 ## Judge demo script (2-3 minutes)
 
 1. Start the investigation and point out that permanent fixes are locked while the proof gate is empty.
