@@ -11,6 +11,7 @@ from time import monotonic
 from urllib import request as urlrequest
 
 import gradio as gr
+import spaces
 from huggingface_hub import InferenceClient
 from transformers import pipeline
 
@@ -54,6 +55,12 @@ def warm_ranker():
     except Exception:
         # Ranking retains its deterministic fallback if this optional model cannot load.
         pass
+
+
+@spaces.GPU
+def declare_zero_gpu_runtime():
+    """Required ZeroGPU declaration; advisory ranking itself remains CPU-safe."""
+    return "ZeroGPU runtime ready"
 
 
 def deterministic_order(hypotheses):
