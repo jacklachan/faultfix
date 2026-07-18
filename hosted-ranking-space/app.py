@@ -742,6 +742,20 @@ body { background:var(--void)!important; }
 }
 """
 
+# Gradio 5 attaches elem_id to the interactive button in some layouts and to
+# its wrapper in others. Target both forms so the demo's action hierarchy stays
+# intact across the supported runtime.
+CSS += """
+.gradio-container #firewall-challenge,.gradio-container #firewall-challenge button { border:1px solid #ff8c71!important; background:linear-gradient(104deg,#662521,#2a1214)!important; color:#fff0eb!important; box-shadow:0 16px 34px rgba(238,103,84,.2)!important; }
+.gradio-container #agent-lab,.gradio-container #agent-lab button,.gradio-container #live-investigator,.gradio-container #live-investigator button { border:1px solid #84e7c3!important; background:linear-gradient(104deg,#a9f2d3,#68d1ae)!important; color:#062119!important; box-shadow:0 14px 30px rgba(96,218,175,.18)!important; }
+.gradio-container #run-model,.gradio-container #run-model button,.gradio-container #public-pack,.gradio-container #public-pack button,.gradio-container #firewall,.gradio-container #firewall button,.gradio-container #challenge-suite,.gradio-container #challenge-suite button { border:1px solid #466c67!important; background:rgba(15,36,38,.95)!important; color:#d2e8de!important; box-shadow:none!important; }
+@media (prefers-reduced-motion:no-preference) {
+  .gradio-container #firewall-challenge:hover,.gradio-container #firewall-challenge button:hover { box-shadow:0 20px 42px rgba(238,103,84,.32)!important; }
+  .gradio-container #agent-lab:hover,.gradio-container #agent-lab button:hover,.gradio-container #live-investigator:hover,.gradio-container #live-investigator button:hover { box-shadow:0 20px 40px rgba(96,218,175,.3)!important; }
+  .gradio-container #run-model:hover,.gradio-container #run-model button:hover,.gradio-container #public-pack:hover,.gradio-container #public-pack button:hover,.gradio-container #firewall:hover,.gradio-container #firewall button:hover,.gradio-container #challenge-suite:hover,.gradio-container #challenge-suite button:hover { border-color:#9adbc4!important; color:#f2fff8!important; }
+}
+"""
+
 def render_verdict():
     result = rank_hypotheses(DEFAULT_HYPOTHESES_JSON)
     top = result["rankedIds"][0] if result["rankedIds"] else "pool-limit"
