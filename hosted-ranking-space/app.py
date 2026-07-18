@@ -672,7 +672,6 @@ with gr.Blocks(title="faultfix | agent authority lab", css=CSS) as demo:
         outputs=live_output,
         show_progress="minimal",
         api_name=False,
-        api_visibility="private",
         concurrency_limit=1,
         concurrency_id="paid-live-inference",
     )
@@ -682,7 +681,6 @@ with gr.Blocks(title="faultfix | agent authority lab", css=CSS) as demo:
         outputs=live_output,
         show_progress="minimal",
         api_name=False,
-        api_visibility="private",
         concurrency_limit=1,
         concurrency_id="paid-live-inference",
     )
