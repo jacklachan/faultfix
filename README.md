@@ -143,7 +143,7 @@ Faultfix is aligned with the direction of Google DeepMind’s CaMeL research: ke
 <details>
 <summary><strong>Hosted Space and model boundary</strong></summary>
 
-The public [Faultfix Space](https://huggingface.co/spaces/jacklachan/faultfix) exposes deterministic safety and ranking demonstrations without visitor keys. Its optional live investigator supports a server-side `HF_TOKEN` for Hugging Face Inference Providers and can fall back to one configured provider (`GEMINI_API_KEY`, `GROQ_API_KEY`, or `OPENROUTER_API_KEY`).
+The public [Faultfix Space](https://huggingface.co/spaces/jacklachan/faultfix) exposes deterministic safety and ranking demonstrations without visitor keys. Its optional live investigator is Hugging Face-only: it uses a server-side `HF_TOKEN` with Hugging Face Inference Providers.
 
 Every live response is schema-validated; malformed output is safely rejected. The model can select an advisory next step from sanitized evidence, while Faultfix independently returns `ALLOW`, `REVIEW`, or `BLOCK`.
 

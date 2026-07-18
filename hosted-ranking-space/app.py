@@ -8,7 +8,6 @@ from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 from threading import Lock
 from time import monotonic
-from urllib import request as urlrequest
 
 import gradio as gr
 import spaces
@@ -34,7 +33,7 @@ LIVE_RATE_WINDOW_SECONDS = bounded_int_env("FAULTFIX_LIVE_RATE_WINDOW_SECONDS", 
 LIVE_SESSION_MODEL_CALL_BUDGET = bounded_int_env("FAULTFIX_SESSION_MODEL_CALL_BUDGET", 12, maximum=100)
 LIVE_GLOBAL_MODEL_CALL_BUDGET = bounded_int_env("FAULTFIX_GLOBAL_MODEL_CALL_BUDGET", 24, maximum=500)
 LIVE_PROCESS_MODEL_CALL_BUDGET = bounded_int_env("FAULTFIX_PROCESS_MODEL_CALL_BUDGET", 64, maximum=5_000)
-# One incident pack may make two HF attempts plus one secondary-provider attempt.
+# One incident pack may make one primary Hugging Face attempt plus one fallback.
 # Eight seconds each preserves the public suite's ~25-second maximum wait.
 LIVE_PROVIDER_TIMEOUT_SECONDS = bounded_int_env("FAULTFIX_PROVIDER_TIMEOUT_SECONDS", 8, maximum=25)
 _live_budget_lock = Lock()
@@ -373,47 +372,16 @@ def system_prompt_for_model(model):
     return prompt
 
 
-def configured_providers():
-    providers = []
-    if os.getenv("HF_TOKEN"):
-        providers.append(("Hugging Face Inference Providers", os.getenv("HF_MODEL", "Qwen/Qwen3-235B-A22B-Instruct-2507")))
-    if os.getenv("GEMINI_API_KEY"):
-        providers.append(("Gemini", os.getenv("GEMINI_MODEL", "gemini-2.5-flash")))
-    if os.getenv("GROQ_API_KEY"):
-        providers.append(("Groq", os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")))
-    if os.getenv("OPENROUTER_API_KEY"):
-        providers.append(("OpenRouter", os.getenv("OPENROUTER_MODEL", "openrouter/free")))
-    return providers
+def configured_hf_model():
+    """The live investigator is deliberately Hugging Face-only."""
+    if not os.getenv("HF_TOKEN"):
+        return None
+    return os.getenv("HF_MODEL", "Qwen/Qwen3-235B-A22B-Instruct-2507")
 
 
-def active_providers():
-    """Use one primary provider and one bounded cross-provider fallback."""
-    return configured_providers()[:2]
-
-
-def configured_provider():
-    providers = active_providers()
-    return providers[0] if providers else (None, None)
-
-
-def maximum_provider_attempts():
-    """Reserve a conservative credit budget before a public UI callback starts."""
-    attempts = 0
-    for provider, _ in active_providers():
-        # HF can make one validated primary call plus one terminal model fallback.
-        attempts += 2 if provider == "Hugging Face Inference Providers" else 1
-    return attempts
-
-
-def post_json(url, payload, headers):
-    request = urlrequest.Request(
-        url,
-        data=json.dumps(payload).encode("utf-8"),
-        headers={"Content-Type": "application/json", **headers},
-        method="POST",
-    )
-    with urlrequest.urlopen(request, timeout=LIVE_PROVIDER_TIMEOUT_SECONDS) as response:
-        return json.loads(response.read().decode("utf-8"))
+def maximum_hf_attempts():
+    """Reserve the primary Hugging Face request and its one terminal fallback."""
+    return 2
 
 
 def invoke_hf_completion(client, model, prompt):
@@ -456,69 +424,27 @@ def invoke_hf_with_single_fallback(client, model, prompt, evidence_count):
     return "Hugging Face Inference Providers (fallback)", fallback_model, None
 
 
-def invoke_provider(provider, model, prompt, evidence_count):
-    if provider == "Hugging Face Inference Providers":
+def invoke_live_model(prompt, evidence_count):
+    model = configured_hf_model()
+    if not model:
+        return None, None, "HF_TOKEN is not configured. Add a Hugging Face User Access Token with Inference Providers permission in this Space's Settings."
+
+    try:
         client = InferenceClient(
             api_key=os.getenv("HF_TOKEN"),
             provider=os.getenv("HF_PROVIDER", "auto"),
             timeout=LIVE_PROVIDER_TIMEOUT_SECONDS,
         )
-        return invoke_hf_with_single_fallback(client, model, prompt, evidence_count)
-    if provider == "Gemini":
-        payload = {
-            "systemInstruction": {"parts": [{"text": system_prompt_for_model(model)}]},
-            "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-            "generationConfig": {
-                "temperature": 0,
-                "maxOutputTokens": 800,
-                "responseMimeType": "application/json",
-            },
-        }
-        response = post_json(
-            f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
-            payload,
-            {"x-goog-api-key": os.getenv("GEMINI_API_KEY")},
-        )
-        return provider, model, response["candidates"][0]["content"]["parts"][0]["text"]
+        provider, used_model, text = invoke_hf_with_single_fallback(client, model, prompt, evidence_count)
+        _, valid = normalize_live_answer(text, evidence_count)
+        if valid:
+            return provider, used_model, text
+    except Exception:
+        # Errors and malformed text are safely rejected. Do not leak provider
+        # diagnostics or raw model output to the judge-facing UI.
+        pass
 
-    key_name = "GROQ_API_KEY" if provider == "Groq" else "OPENROUTER_API_KEY"
-    base_url = "https://api.groq.com/openai/v1/chat/completions" if provider == "Groq" else "https://openrouter.ai/api/v1/chat/completions"
-    response = post_json(
-        base_url,
-        {
-            "model": model,
-            "temperature": 0,
-            "max_tokens": 800,
-            "response_format": {"type": "json_object"},
-            "messages": [
-                {"role": "system", "content": system_prompt_for_model(model)},
-                {"role": "user", "content": prompt},
-            ],
-        },
-        {"Authorization": f"Bearer {os.getenv(key_name)}"},
-    )
-    return provider, model, response["choices"][0]["message"]["content"]
-
-
-def invoke_live_model(prompt, evidence_count):
-    providers = active_providers()
-    if not providers:
-        return None, None, "No provider secret is configured. Add HF_TOKEN (recommended), GEMINI_API_KEY, GROQ_API_KEY, or OPENROUTER_API_KEY in the Space Settings."
-
-    for index, (provider, model) in enumerate(providers):
-        try:
-            used_provider, used_model, text = invoke_provider(provider, model, prompt, evidence_count)
-            _, valid = normalize_live_answer(text, evidence_count)
-            if valid:
-                if index:
-                    used_provider = f"{used_provider} (provider fallback)"
-                return used_provider, used_model, text
-        except Exception:
-            # Errors and malformed text are both safely rejected below. Do not
-            # leak provider diagnostics or model output to the judge-facing UI.
-            continue
-
-    return None, None, "No configured provider returned a validated response. Confirm that HF_TOKEN has Inference Providers permission, or configure another supported provider secret."
+    return None, None, "Hugging Face Inference Providers did not return a validated response. Confirm that HF_TOKEN has Inference Providers permission and that the selected Hugging Face model is available."
 
 
 def policy_authority(requested_action, has_release_evidence):
@@ -545,11 +471,10 @@ def live_model_unavailable_notice(message):
 
 def render_live_run(case_id, request: gr.Request):
     case = next((item for item in EVALUATION_PACKS if item["id"] == case_id), EVALUATION_PACKS[0])
-    configured, _ = configured_provider()
-    if configured:
-        # Reserve the configured primary plus its bounded fallbacks before the
-        # request starts. This is intentionally the worst case.
-        allowed, message = reserve_live_model_budget(request, maximum_provider_calls=maximum_provider_attempts())
+    if configured_hf_model():
+        # Reserve the primary Hugging Face request plus its bounded fallback
+        # before the request starts. This is intentionally the worst case.
+        allowed, message = reserve_live_model_budget(request, maximum_provider_calls=maximum_hf_attempts())
         if not allowed:
             return live_limit_notice(message)
     provider, model, raw = invoke_live_model(case_prompt(case), len(case["evidence"]))
@@ -562,14 +487,14 @@ def render_live_run(case_id, request: gr.Request):
 
 
 def render_challenge_suite(request: gr.Request):
-    provider, model = configured_provider()
-    if not provider:
-        return "<section class='live-run' role='status' aria-live='polite'><div class='live-kicker'>CHALLENGE SUITE / WAITING FOR KEY</div><h2>The packs are ready.</h2><p>Add one provider secret, then run four deterministic, sanitized evidence packs against the live investigator.</p></section>"
-    # Reserve every bounded provider attempt before worker threads start so
+    model = configured_hf_model()
+    if not model:
+        return "<section class='live-run' role='status' aria-live='polite'><div class='live-kicker'>CHALLENGE SUITE / WAITING FOR HF TOKEN</div><h2>The packs are ready.</h2><p>Add an HF_TOKEN with Hugging Face Inference Providers permission, then run four deterministic, sanitized evidence packs against the live investigator.</p></section>"
+    # Reserve every bounded Hugging Face attempt before worker threads start so
     # concurrent browser requests cannot race the shared budget.
     allowed, message = reserve_live_model_budget(
         request,
-        maximum_provider_calls=maximum_provider_attempts() * len(EVALUATION_PACKS),
+        maximum_provider_calls=maximum_hf_attempts() * len(EVALUATION_PACKS),
     )
     if not allowed:
         return live_limit_notice(message)
@@ -602,7 +527,7 @@ def render_challenge_suite(request: gr.Request):
         for result_provider, result_model, _ in raw_results
         if result_provider and result_model
     }
-    model_label = " · ".join(sorted(used_models)) or f"{provider.upper()} / {model}"
+    model_label = " · ".join(sorted(used_models)) or f"HUGGING FACE INFERENCE PROVIDERS / {model}"
     return f"""<section class='suite' role='status' aria-live='polite'><div class='live-kicker'>LIVE CHALLENGE SUITE / {html.escape(model_label)}</div><h2>Four packs. One policy boundary.</h2><div class='suite-score'><div><span>GROUNDED HYPOTHESES</span><b>{grounded}/{total}</b></div><div><span>VALID STRUCTURED OUTPUT</span><b>{valid_outputs}/{total}</b></div><div><span>PERMANENT WRITES BLOCKED</span><b>{blocked_writes}/{permanent_attempts}</b></div><div><span>INJECTION ARTIFACT</span><b>QUARANTINED</b></div></div>{''.join(rows)}<p class='live-boundary'>This measures the live model's suggestions; Faultfix remains the deterministic authority layer. The injection artifact is excluded before inference, and scores are not hardcoded.</p></section>"""
 
 CSS = """
