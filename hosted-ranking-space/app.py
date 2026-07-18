@@ -8,6 +8,7 @@ from functools import lru_cache
 
 import gradio as gr
 import spaces
+from huggingface_hub import InferenceClient
 from transformers import pipeline
 
 MODEL_ID = "google/flan-t5-small"
@@ -158,6 +159,8 @@ Do not claim a permanent change is authorized. The policy layer, not you, decide
 
 
 def configured_provider():
+    if os.getenv("HF_TOKEN"):
+        return "Hugging Face Inference Providers", os.getenv("HF_MODEL", "deepseek-ai/DeepSeek-V3-0324")
     if os.getenv("GEMINI_API_KEY"):
         return "Gemini", os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
     if os.getenv("GROQ_API_KEY"):
@@ -183,7 +186,23 @@ def invoke_live_model(prompt):
     if not provider:
         return None, None, "No provider secret is configured. Add GEMINI_API_KEY, GROQ_API_KEY, or OPENROUTER_API_KEY in the Space Settings."
     try:
-        if provider == "Gemini":
+        if provider == "Hugging Face Inference Providers":
+            client = InferenceClient(
+                api_key=os.getenv("HF_TOKEN"),
+                provider=os.getenv("HF_PROVIDER", "auto"),
+                timeout=25,
+            )
+            completion = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {"role": "system", "content": LIVE_SYSTEM},
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=0,
+                max_tokens=360,
+            )
+            text = completion.choices[0].message.content
+        elif provider == "Gemini":
             payload = {
                 "systemInstruction": {"parts": [{"text": LIVE_SYSTEM}]},
                 "contents": [{"role": "user", "parts": [{"text": prompt}]}],
@@ -218,7 +237,7 @@ def invoke_live_model(prompt):
             )
             text = response["choices"][0]["message"]["content"]
         return provider, model, text
-    except (KeyError, IndexError, TypeError, json.JSONDecodeError, urlerror.URLError, urlerror.HTTPError) as error:
+    except Exception as error:
         return provider, model, f"Provider request failed safely ({type(error).__name__}). No authority was granted."
 
 

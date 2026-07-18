@@ -42,7 +42,7 @@ The proof gate is complete only when all four checks are met: direct symptom evi
 - Reversible containment is sent to human review only after a recent release is evidenced.
 - Permanent remediation is blocked until the causal proof gate passes, then remains human-approved and staged.
 
-The authority engine is shared policy, not model output. The hosted Space can use a server-side `GEMINI_API_KEY` (recommended free option), `GROQ_API_KEY`, or `OPENROUTER_API_KEY` for its live investigator. The model selects an advisory next step from sanitized evidence while Faultfix continues to determine whether each one is allowed, reviewed, or blocked.
+The authority engine is shared policy, not model output. The hosted Space prefers a server-side `HF_TOKEN` for Hugging Face Inference Provider billing, and also supports `GEMINI_API_KEY`, `GROQ_API_KEY`, or `OPENROUTER_API_KEY`. The model selects an advisory next step from sanitized evidence while Faultfix continues to determine whether each one is allowed, reviewed, or blocked.
 
 ## Evidence Firewall
 
