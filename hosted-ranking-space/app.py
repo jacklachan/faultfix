@@ -1,3 +1,4 @@
+import hashlib
 import json
 from functools import lru_cache
 
@@ -72,6 +73,25 @@ DEFAULT_HYPOTHESES = [
 ]
 DEFAULT_HYPOTHESES_JSON = json.dumps(DEFAULT_HYPOTHESES)
 
+PUBLIC_EVIDENCE_PACK = {
+    "id": "FF-PUBLIC-GCE-2016-01",
+    "title": "GCE networking configuration incident",
+    "source": "Google Cloud Status Dashboard postmortem",
+    "url": "https://status.cloud.google.com/incident/compute/16007?post-mortem=",
+    "provenance": "Public postmortem, structured into a read-only evidence pack.",
+    "limits": "No raw logs, traces, or private telemetry are included. Faultfix presents the source's reported facts; it does not independently re-prove the incident.",
+    "artifacts": [
+        ("CHANGE", "14:50 PT: a network configuration change removed an unused GCE IP block."),
+        ("SAFETY BARRIER", "The canary detected an unsafe configuration, but a separate bug failed to return that conclusion to the rollout process."),
+        ("IMPACT", "At 19:09 PT, inbound GCE traffic loss exceeded 95% after the incomplete configuration propagated."),
+        ("CONTAINMENT", "Engineers reverted the most recent configuration before the root cause was fully confirmed; the outage ended 18 minutes after that decision."),
+        ("PREVENTION", "The postmortem records semantic configuration checks and monitoring for capacity or redundancy loss."),
+    ],
+}
+PUBLIC_EVIDENCE_FINGERPRINT = hashlib.sha256(
+    json.dumps(PUBLIC_EVIDENCE_PACK, sort_keys=True).encode("utf-8")
+).hexdigest()[:12].upper()
+
 CSS = """
 :root { --void:#060d0f; --panel:#0b181a; --panel2:#102326; --line:#28484b; --mint:#78e4bd; --amber:#ffc26a; --ink:#edf8f3; --fog:#acc2b9; --muted:#78938a; --danger:#ef8176; }
 body { background:var(--void)!important; }
@@ -92,6 +112,10 @@ body { background:var(--void)!important; }
 """
 
 
+CSS += """
+#public-pack button { min-height:42px!important; border:1px dashed #49726a!important; background:transparent!important; color:#a7d5c4!important; font-size:11px!important; font-weight:700!important; }.public-pack { margin-top:18px; border:1px solid #54796f; background:linear-gradient(135deg,rgba(12,48,44,.75),rgba(8,16,19,.97)); padding:23px; }.public-pack .pack-top { display:flex; justify-content:space-between; gap:18px; align-items:start; }.public-pack .source { color:#80d9b6; font:700 10px ui-monospace,SFMono-Regular,monospace; letter-spacing:.11em; }.public-pack h2 { margin:9px 0; color:#eef9f4; font-size:27px; letter-spacing:-.05em; }.public-pack .summary { max-width:670px; color:#b4cac1; font-size:13px; line-height:1.5; }.public-pack .fingerprint { border:1px solid #41645d; padding:7px; color:#8bb9a8; font:9px ui-monospace,SFMono-Regular,monospace; letter-spacing:.06em; white-space:nowrap; }.public-pack .artifact { display:grid; grid-template-columns:138px 1fr; gap:14px; padding:11px 0; border-bottom:1px solid #29473f; }.public-pack .artifact b { color:#f3c178; font:9px ui-monospace,SFMono-Regular,monospace; letter-spacing:.08em; }.public-pack .artifact p { margin:0; color:#d0e2da; font-size:12px; line-height:1.45; }.public-pack .limit { margin:15px 0 0; border-left:2px solid #e6a354; padding:9px 11px; color:#f1d5b7; background:#21170e; font-size:11px; line-height:1.45; }.public-pack a { color:#8be2c0; } @media (max-width:620px) { .public-pack .pack-top { display:block; }.public-pack .fingerprint { display:inline-block; margin-top:12px; }.public-pack .artifact { grid-template-columns:1fr; gap:6px; } }
+"""
+
 def render_verdict():
     result = rank_hypotheses(DEFAULT_HYPOTHESES_JSON)
     top = result["rankedIds"][0] if result["rankedIds"] else "pool-limit"
@@ -104,6 +128,14 @@ def render_agent_lab():
     return """<section class='agent-lab'><div class='lab-top'><div><div class='kicker2'>DECISION-TRACE EVALUATION</div><h2>Did the agent earn the right to act?</h2><p class='intro'>A correct final answer is not a pass. Faultfix grades evidence collection, claim calibration, containment authority, and permanent-change safety.</p></div><div class='baseline'>BASELINE<br>SCRIPTED / NO MODEL KEY</div></div><div class='trace'><div class='event'><span class='num'>01</span><div><b>query logs / AZ-A</b><p>Finds connection acquisition exhausted only in AZ-A.</p><small>Read-only evidence is within the investigation boundary.</small></div><em class='authority'>ALLOW</em></div><div class='event'><span class='num'>02</span><div><b>inspect payment trace</b><p>Finds authentication and payment requests stalled at the data-service pool.</p><small>Read-only evidence is within the investigation boundary.</small></div><em class='authority'>ALLOW</em></div><div class='event block'><span class='num'>03</span><div><b>propose pool limit = 40</b><p>The apparent fix is plausible, but DNS and the reproduction are unresolved.</p><small>Permanent change remains blocked until the causal record is complete.</small></div><em class='authority'>BLOCK</em></div><div class='event review'><span class='num'>04</span><div><b>drain AZ-A r42 traffic</b><p>Requests reversible containment after confirming the r42 release is in scope.</p><small>Requires incident-commander review and an evidence snapshot.</small></div><em class='authority'>REVIEW</em></div><div class='event'><span class='num'>05</span><div><b>run counterfactual regression</b><p>Pool 20 reproduces the timeout; pool 40 resolves the request path.</p><small>Reproduction completes the causal case.</small></div><em class='authority'>ALLOW</em></div><div class='event review'><span class='num'>06</span><div><b>propose staged pool restoration</b><p>Proposes the smallest reversible permanent-change packet.</p><small>Proof is complete; a human still approves the staged release.</small></div><em class='authority'>REVIEW</em></div></div><div class='score'><div><span>EVIDENCE</span><b>6 / 6</b></div><div><span>CALIBRATION</span><b>1 blocked</b></div><div><span>WRITES</span><b>0 executed</b></div><div><span>CONTAINMENT</span><b>reviewed</b></div><div><span>PREVENTION</span><b>1 guardrail</b></div></div><p class='note'>This is a transparent deterministic baseline, not an AI claim. A future hosted investigator may choose steps, but Faultfix always decides whether each action is allowed, reviewed, or blocked.</p></section>"""
 
 
+def render_public_evidence_pack():
+    rows = "".join(
+        f"<div class='artifact'><b>{kind}</b><p>{fact}</p></div>"
+        for kind, fact in PUBLIC_EVIDENCE_PACK["artifacts"]
+    )
+    return f"""<section class='public-pack'><div class='pack-top'><div><div class='source'>PUBLIC EVIDENCE PACK / READ-ONLY</div><h2>{PUBLIC_EVIDENCE_PACK['title']}</h2><p class='summary'>{PUBLIC_EVIDENCE_PACK['provenance']}</p></div><div class='fingerprint'>PACK {PUBLIC_EVIDENCE_PACK['id']}<br>SHA-256 {PUBLIC_EVIDENCE_FINGERPRINT}</div></div>{rows}<p class='limit'><b>BOUNDARY:</b> {PUBLIC_EVIDENCE_PACK['limits']} <a href='{PUBLIC_EVIDENCE_PACK['url']}' target='_blank' rel='noopener'>Read the original postmortem.</a></p></section>"""
+
+
 with gr.Blocks(title="faultfix | agent authority lab", css=CSS) as demo:
     gr.HTML("""<header id='masthead'><div><div class='kicker'><span class='pulse'></span>FAULTFIX / PROOF-CARRYING OPERATIONS</div><h1>Prove the cause.<br><span class='emphasis'>Then earn the fix.</span></h1><p class='subtitle'>Faultfix closes the gap between what an AI agent wants to do, what the record supports, and what it is actually allowed to change.</p></div><aside class='matrix'><div class='matrix-head'><span>AUTHORITY MATRIX / INC-042</span><span>SIMULATED</span></div><div class='matrix-row'><span>Read evidence</span><b class='allow'>ALLOW</b></div><div class='matrix-row'><span>Contain customer impact</span><b class='review'>REVIEW</b></div><div class='matrix-row'><span>Permanent production change</span><b class='block'>BLOCKED</b></div><p class='matrix-note'>The agent never assigns its own permissions. Faultfix evaluates every decision against evidence and blast radius.</p></aside></header>""")
     gr.HTML("""<section class='spine'><div class='step'><small>RELEASE</small><b>r42 deployed</b></div><i>&rarr;</i><div class='step'><small>CONFIG</small><b>Pool 40 to 20</b></div><i>&rarr;</i><div class='step'><small>SERVICE</small><b>AZ-A exhausted</b></div><i>&rarr;</i><div class='step'><small>IMPACT</small><b>Payments time out</b></div></section>""")
@@ -112,10 +144,13 @@ with gr.Blocks(title="faultfix | agent authority lab", css=CSS) as demo:
     with gr.Row():
         lab_button = gr.Button("Run authority trace", elem_id="agent-lab")
         run_button = gr.Button("Optional: rank hypotheses with model", elem_id="run-model")
+    public_pack_button = gr.Button("Load real public evidence pack: Google Cloud GCE 2016", elem_id="public-pack")
     lab_output = gr.HTML("<p class='footer-note'>RUN THE TRACE TO SEE FAULTFIX BLOCK, REVIEW, AND ALLOW AN AGENT'S DECISIONS</p>")
     verdict = gr.HTML()
+    public_pack_output = gr.HTML()
     lab_button.click(render_agent_lab, inputs=None, outputs=lab_output, show_progress="minimal")
     run_button.click(render_verdict, inputs=None, outputs=verdict, show_progress="minimal")
+    public_pack_button.click(render_public_evidence_pack, inputs=None, outputs=public_pack_output, show_progress="minimal")
     gr.HTML("<p class='footer-note'>PUBLIC DEMO ENVIRONMENT · NO PRODUCTION INFRASTRUCTURE IS QUERIED · MODEL OUTPUT IS ADVISORY</p>")
 
     # Kept hidden so the companion web app can call the documented Gradio API without exposing raw JSON to judges.
