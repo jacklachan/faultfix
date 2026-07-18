@@ -179,6 +179,56 @@
   line-height: 1.5;
 }
 
+.boundaryLedger {
+  margin-top: 17px;
+  border: 1px solid #294840;
+  background: #081516;
+}
+.ledgerTitle {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #294840;
+  color: #78d7b6;
+  font: 9px var(--font-geist-mono);
+  letter-spacing: 0.07em;
+}
+.ledgerTitle span {
+  color: #718b82;
+  text-align: right;
+}
+.boundaryLedger article {
+  display: grid;
+  grid-template-columns: 145px 1fr;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #203633;
+}
+.boundaryLedger article:last-child {
+  border-bottom: 0;
+}
+.boundaryLedger article > span {
+  color: #80a097;
+  font: 9px var(--font-geist-mono);
+  text-transform: uppercase;
+}
+.boundaryLedger p {
+  margin: 0;
+  color: #b3c7c0;
+  font-size: 11px;
+  line-height: 1.45;
+}
+.boundaryLedger .falsifier {
+  background: #21140d;
+}
+.boundaryLedger .falsifier > span {
+  color: #f1ad68;
+}
+.boundaryLedger .falsifier p {
+  color: #ffe9d8;
+}
+
 .certificateFoot {
   display: flex;
   align-items: center;
@@ -321,6 +371,14 @@
   .certificateFoot {
     align-items: flex-start;
     flex-direction: column;
+  }
+  .ledgerTitle,
+  .boundaryLedger article {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+  .ledgerTitle span {
+    text-align: left;
   }
   .packetHeadline {
     display: block;

@@ -6,6 +6,7 @@ import {
   incidentReceipt,
   initialInvestigation,
   nextAction,
+  nextEvidencePolicy,
   proofCertificate,
   proofGate,
   remediationPlan,
@@ -46,6 +47,10 @@ export default function Home() {
     [investigation.completed],
   );
   const next = nextAction(investigation.completed);
+  const policy = useMemo(
+    () => nextEvidencePolicy(investigation.completed),
+    [investigation.completed],
+  );
   const evidence = investigation.completed.map(actionResult);
   useEffect(() => {
     function closeOnEscape(event: KeyboardEvent) {
@@ -238,6 +243,33 @@ export default function Home() {
             CAUSAL RECORD{" "}
             <span>{gate.complete ? "PROOF COMPLETE" : "BUILDING CASE"}</span>
           </div>
+          {policy ? (
+            <section
+              className={styles.evidencePolicy}
+              aria-label="Next evidence policy"
+            >
+              <div>
+                <span>NEXT BEST CHECK</span>
+                <b>{policy.action.label}</b>
+              </div>
+              <p>{policy.rationale}</p>
+              <small>
+                <em>{policy.value} VALUE</em> / CAN CHANGE THE CASE:{" "}
+                {policy.changesMind}
+              </small>
+            </section>
+          ) : (
+            <section className={styles.evidencePolicy}>
+              <div>
+                <span>INVESTIGATION POLICY</span>
+                <b>Evidence budget complete</b>
+              </div>
+              <p>
+                Every planned check was collected. The conclusion is ready for
+                independent challenge.
+              </p>
+            </section>
+          )}
           <div className={styles.graph}>
             <div
               className={`${styles.node} ${investigation.completed.includes("diff") ? styles.active : ""} ${styles.deploy}`}
@@ -529,6 +561,23 @@ export default function Home() {
             <div className={phase2.counterfactual}>
               <b>COUNTERFACTUAL TEST</b>
               <p>{certificate.counterfactual}</p>
+            </div>
+            <div className={phase2.boundaryLedger}>
+              <div className={phase2.ledgerTitle}>
+                <b>BOUNDARY LEDGER</b>
+                <span>WHAT THIS CLAIM DOES — AND DOES NOT — COVER</span>
+              </div>
+              {certificate.boundaries.map((boundary) => (
+                <article
+                  key={`${boundary.id}-${boundary.statement}`}
+                  className={
+                    boundary.id === "falsifier" ? phase2.falsifier : ""
+                  }
+                >
+                  <span>{boundary.label}</span>
+                  <p>{boundary.statement}</p>
+                </article>
+              ))}
             </div>
             <div className={phase2.certificateFoot}>
               <span>SCENARIO FINGERPRINT / {certificate.fingerprint}</span>

@@ -57,6 +57,54 @@ export function actionResult(id: ActionId) {
 export function nextAction(completed: ActionId[]) {
   return ACTIONS.find((action) => !completed.includes(action.id));
 }
+
+const actionPolicy: Record<
+  ActionId,
+  { value: "High" | "Decisive"; rationale: string; changesMind: string }
+> = {
+  logs: {
+    value: "High",
+    rationale: "Establishes the failure scope before investigating a cause.",
+    changesMind:
+      "If connection exhaustion is absent in AZ-A, the pool-limit lead loses priority.",
+  },
+  trace: {
+    value: "High",
+    rationale:
+      "Tests whether the data-service pool is on the failing customer path.",
+    changesMind:
+      "If auth and payments do not traverse the pool, the proposed mechanism fails.",
+  },
+  diff: {
+    value: "High",
+    rationale:
+      "Tests whether the suspected change occurred before the failure.",
+    changesMind: "If r42 did not touch the service, temporal causality fails.",
+  },
+  config: {
+    value: "High",
+    rationale: "Tests the exact mechanism, not merely a correlated deploy.",
+    changesMind:
+      "If the pool limit was unchanged, r42 is not a sufficient explanation.",
+  },
+  infra: {
+    value: "High",
+    rationale: "Attempts to disprove the most plausible competing explanation.",
+    changesMind: "If DNS changed AZ-A routing, the alternative remains live.",
+  },
+  regression: {
+    value: "Decisive",
+    rationale:
+      "Performs the smallest counterfactual test that can unlock a safe recommendation.",
+    changesMind:
+      "If pool 40 does not recover requests, the candidate patch is rejected.",
+  },
+};
+
+export function nextEvidencePolicy(completed: ActionId[]) {
+  const action = nextAction(completed);
+  return action ? { action, ...actionPolicy[action.id] } : null;
+}
 export function proofGate(completed: ActionId[]) {
   const has = (ids: ActionId[]) => ids.every((id) => completed.includes(id));
   const requirements = [
@@ -79,6 +127,12 @@ export type CertificateLink = {
   statement: string;
   evidence: ActionId[];
   verified: boolean;
+};
+
+export type CertificateBoundary = {
+  id: "scope" | "assumption" | "falsifier";
+  label: string;
+  statement: string;
 };
 
 function scenarioFingerprint(value: string) {
@@ -145,6 +199,32 @@ export function proofCertificate(completed: ActionId[]) {
     verdict: ready ? "Causal proof complete" : "Causal proof incomplete",
     counterfactual:
       "DATABASE_POOL_LIMIT=20 → AZ-A timeout; DATABASE_POOL_LIMIT=40 → requests complete within 300ms.",
+    boundaries: [
+      {
+        id: "scope",
+        label: "Decision scope",
+        statement:
+          "This conclusion applies to INC-042, the r42 deployment, and the recorded AZ-A failure pattern.",
+      },
+      {
+        id: "assumption",
+        label: "Required assumption",
+        statement:
+          "No unrecorded AZ-A routing or configuration change occurred in the same window.",
+      },
+      {
+        id: "assumption",
+        label: "Required assumption",
+        statement:
+          "The regression environment preserves the connection-pool behavior relevant to this outage.",
+      },
+      {
+        id: "falsifier",
+        label: "Would overturn the case",
+        statement:
+          "A pool limit of 40 still reproduces the same failure, or a distinct AZ-A routing change is found.",
+      },
+    ] satisfies CertificateBoundary[],
   };
 }
 

@@ -3,6 +3,7 @@ import {
   actionResult,
   incidentReceipt,
   nextAction,
+  nextEvidencePolicy,
   proofCertificate,
   proofGate,
   remediationPlan,
@@ -50,6 +51,22 @@ describe("faultfix proof engine", () => {
       nextAction(["logs", "trace", "diff", "config", "infra", "regression"]),
     ).toBeUndefined();
   });
+  it("explains the uncertainty each next evidence action can reduce", () => {
+    expect(nextEvidencePolicy([])?.action.id).toBe("logs");
+    expect(
+      nextEvidencePolicy(["logs", "trace", "diff", "config", "infra"])?.value,
+    ).toBe("Decisive");
+    expect(
+      nextEvidencePolicy([
+        "logs",
+        "trace",
+        "diff",
+        "config",
+        "infra",
+        "regression",
+      ]),
+    ).toBeNull();
+  });
   it("keeps the causal certificate incomplete until every proof link is evidenced", () => {
     const certificate = proofCertificate(["logs", "trace", "diff", "config"]);
     expect(certificate.ready).toBe(false);
@@ -71,6 +88,9 @@ describe("faultfix proof engine", () => {
     expect(certificate.links.every((link) => link.verified)).toBe(true);
     expect(certificate.counterfactual).toContain("LIMIT=20");
     expect(certificate.fingerprint).toMatch(/^FF-[A-F0-9]{8}$/);
+    expect(
+      certificate.boundaries.filter((boundary) => boundary.id === "falsifier"),
+    ).toHaveLength(1);
     expect(proofCertificate([...completed]).fingerprint).toBe(
       certificate.fingerprint,
     );

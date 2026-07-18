@@ -302,6 +302,48 @@
     #081315;
   padding: 18px;
 }
+.evidencePolicy {
+  display: grid;
+  grid-template-columns: 185px 1fr;
+  gap: 14px;
+  align-items: center;
+  margin-top: 14px;
+  padding: 11px 13px;
+  border: 1px solid rgba(112, 224, 189, 0.27);
+  background: linear-gradient(
+    90deg,
+    rgba(24, 70, 59, 0.37),
+    rgba(10, 24, 24, 0.42)
+  );
+}
+.evidencePolicy div span,
+.evidencePolicy small {
+  display: block;
+  font: 9px var(--font-geist-mono);
+  letter-spacing: 0.07em;
+}
+.evidencePolicy div span {
+  color: #75b49f;
+}
+.evidencePolicy div b {
+  display: block;
+  margin-top: 5px;
+  color: #e6f6ef;
+  font-size: 12px;
+}
+.evidencePolicy p {
+  color: #aec6bd;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.evidencePolicy small {
+  grid-column: 2;
+  color: #849d94;
+}
+.evidencePolicy small em {
+  font-style: normal;
+  color: #7ce1bf;
+}
 .graph {
   height: 310px;
   position: relative;
@@ -725,6 +767,13 @@
   }
   .canvas {
     padding: 14px;
+  }
+  .evidencePolicy {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+  .evidencePolicy small {
+    grid-column: auto;
   }
   .proof {
     border: 0;
