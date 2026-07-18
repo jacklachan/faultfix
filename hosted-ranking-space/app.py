@@ -62,14 +62,23 @@ DEFAULT_HYPOTHESES_JSON = json.dumps(DEFAULT_HYPOTHESES)
 CSS = """
 :root { --void: #070d10; --panel: #0c171b; --panel-2: #102126; --line: #29454b; --mint: #75e0b8; --amber: #ffc36a; --fog: #b9cac4; --muted: #728a83; }
 body { background: var(--void) !important; }
-.gradio-container { max-width: 1120px !important; background: radial-gradient(ellipse at 50% -12%, #1b4040 0, transparent 47%), var(--void) !important; color: var(--fog) !important; font-family: Inter, ui-sans-serif, system-ui, sans-serif !important; padding: 0 18px 30px !important; }
-#masthead { padding: 42px 0 26px; border-bottom: 1px solid var(--line); position: relative; }
+.gradio-container { max-width: none !important; width: 100% !important; margin: 0 !important; background: radial-gradient(ellipse at 50% -12%, #1b4040 0, transparent 47%), var(--void) !important; color: var(--fog) !important; font-family: Inter, ui-sans-serif, system-ui, sans-serif !important; padding: 0 clamp(28px, 4vw, 78px) 30px !important; }
+#masthead { padding: 42px 0 32px; border-bottom: 1px solid var(--line); position: relative; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(340px, .75fr); gap: clamp(34px, 7vw, 130px); align-items: end; }
 #masthead:after { content: ""; position: absolute; bottom: -1px; left: 0; width: 132px; height: 2px; background: var(--mint); box-shadow: 0 0 18px var(--mint); }
 #masthead h1 { color: #f3faf5; font-size: clamp(38px, 6vw, 66px); line-height: .98; letter-spacing: -.075em; max-width: 780px; margin: 16px 0; }
 #masthead p { max-width: 610px; color: #9fb5ad; line-height: 1.6; font-size: 15px; }
 .topline { display: flex; align-items: center; gap: 12px; color: var(--amber); font: 700 11px ui-monospace, SFMono-Regular, monospace; letter-spacing: .14em; }
 .topline .pulse { width: 8px; height: 8px; border-radius: 99px; background: var(--mint); box-shadow: 0 0 14px var(--mint); }
 .case-chip { display: inline-block; margin-left: auto; color: #90a9a0; border: 1px solid #36545a; padding: 6px 9px; letter-spacing: .08em; }
+.case-ledger { border: 1px solid #315159; background: linear-gradient(145deg, rgba(20, 54, 55, .62), rgba(11, 22, 26, .88)); padding: 20px; min-height: 246px; position: relative; overflow: hidden; }
+.case-ledger:before { content: ""; position: absolute; inset: 0; opacity: .18; background-image: linear-gradient(#5bc7aa 1px, transparent 1px), linear-gradient(90deg, #5bc7aa 1px, transparent 1px); background-size: 36px 36px; mask-image: linear-gradient(to bottom, black, transparent); }
+.ledger-head, .ledger-row { position: relative; display: flex; align-items: center; justify-content: space-between; }
+.ledger-head { color: var(--mint); font: 700 10px ui-monospace, SFMono-Regular, monospace; letter-spacing: .14em; padding-bottom: 15px; border-bottom: 1px solid #2e5056; }
+.ledger-row { border-bottom: 1px solid rgba(46,80,86,.72); padding: 14px 0; color: #c9dbd4; font-size: 13px; }
+.ledger-row small { color: #82a098; font: 10px ui-monospace, SFMono-Regular, monospace; letter-spacing: .08em; }
+.ledger-row .verified { color: var(--mint); }
+.ledger-row .pending { color: var(--amber); }
+.ledger-foot { position: relative; color: #9db3ab; font-size: 12px; line-height: 1.45; margin: 16px 0 0; }
 .causal-spine { display: flex; align-items: center; gap: 10px; margin: 30px 0 20px; overflow-x: auto; padding-bottom: 4px; }
 .causal-spine .step { flex: 1; min-width: 145px; padding: 13px 14px; background: rgba(15, 30, 34, .74); border: 1px solid #2a464c; }
 .causal-spine b { display: block; color: #e6f0eb; font-size: 13px; margin-top: 5px; }
@@ -95,7 +104,7 @@ body { background: var(--void) !important; }
 .verdict p { color: #b6cbc3; margin: 0; line-height: 1.55; max-width: 650px; }
 .verdict .disclaimer { color: var(--amber); margin-top: 15px; font-size: 12px; }
 .footer-note { color: #6f8a82; font-size: 12px; text-align: center; padding: 30px 0 8px; }
-@media (max-width: 700px) { .case-chip { display: none; } .causal-spine .step { min-width: 128px; } .proof-boundary { display: block; } .proof-boundary b { display: block; margin-bottom: 7px; } }
+@media (max-width: 820px) { #masthead { grid-template-columns: 1fr; gap: 24px; } .case-chip { display: none; } .causal-spine .step { min-width: 128px; } .proof-boundary { display: block; } .proof-boundary b { display: block; margin-bottom: 7px; } }
 """
 
 
@@ -109,7 +118,7 @@ def render_verdict():
 
 
 with gr.Blocks(title="faultfix | evidence ranking", css=CSS) as demo:
-    gr.HTML("""<header id='masthead'><div class='topline'><span class='pulse'></span>FAULTFIX / INCIDENT LAB <span class='case-chip'>SIMULATED / INC-042</span></div><h1>Prove the cause.<br>Then earn the fix.</h1><p>A model-assisted challenge to the two most plausible explanations for a payments outage. The ranking is only a signal; the evidence chain is the authority.</p></header>""")
+    gr.HTML("""<header id='masthead'><div class='hero-copy'><div class='topline'><span class='pulse'></span>FAULTFIX / INCIDENT LAB <span class='case-chip'>SIMULATED / INC-042</span></div><h1>Prove the cause.<br>Then earn the fix.</h1><p>A model-assisted challenge to the two most plausible explanations for a payments outage. The ranking is only a signal; the evidence chain is the authority.</p></div><aside class='case-ledger'><div class='ledger-head'><span>LIVE CASE LEDGER</span><span>00:42:17</span></div><div class='ledger-row'><span>Direct symptom</span><small class='verified'>LOGS READY</small></div><div class='ledger-row'><span>Deploy / config</span><small class='verified'>R42 + DIFF</small></div><div class='ledger-row'><span>Causal proof</span><small class='pending'>AWAITING TEST</small></div><div class='ledger-row'><span>Fix authority</span><small class='pending'>LOCKED</small></div><p class='ledger-foot'>The model can rank a lead. Only reproducible evidence changes the case state.</p></aside></header>""")
     gr.HTML("""<section class='causal-spine'><div class='step'><small>RELEASE</small><b>r42 deployed</b></div><div class='arrow'>→</div><div class='step'><small>CONFIG</small><b>Pool 40 → 20</b></div><div class='arrow'>→</div><div class='step'><small>SERVICE</small><b>AZ-A exhausted</b></div><div class='arrow'>→</div><div class='step'><small>IMPACT</small><b>Payments time out</b></div></section>""")
     with gr.Row():
         gr.HTML("""<article class='signal'><div class='index'>HYPOTHESIS 01 / CAUSAL FIT</div><span class='tag'>DIRECT MECHANISM</span><h3>Pool limit reduced</h3><p>Release <b>r42</b> changed the data-service connection pool from 40 to 20. Connection acquisition then exhausts only in AZ-A.</p></article>""")
