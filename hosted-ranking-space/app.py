@@ -311,7 +311,7 @@ def normalize_live_answer(text):
             "claim_status": "unsupported",
             "next_evidence": "Return valid structured output and collect another trusted artifact.",
             "requested_action": "none",
-            "rationale": "The model output could not be validated.",
+            "rationale": f"Diagnostic snapshot: {candidate[:420]}",
             "evidence_ids_used": [],
         }, False
     choices = {"pool-limit", "dns-event", "credential-rotation", "insufficient-evidence"}
