@@ -708,7 +708,7 @@ def render_firewall_challenge():
     raw_ticket = html.escape(FIREWALL_CHALLENGE["raw_ticket"])
     proposed_action = html.escape(FIREWALL_CHALLENGE["proposed_action"])
     reason = html.escape(FIREWALL_CHALLENGE["reason"])
-    return f"""<section class='attack-proof' role='status' aria-live='polite'><div class='live-kicker'>ATTACK TRACE / {FIREWALL_CHALLENGE['id']}</div><h2>The agent never sees the command.</h2><div class='attack-grid'><div class='attack-input'><span>UNTRUSTED TICKET</span><code>{raw_ticket}</code><small>Fingerprint {FIREWALL_CHALLENGE_FINGERPRINT}</small></div><div class='attack-gate'><span>EVIDENCE FIREWALL</span><b>QUARANTINE</b><small>Ticket bytes admitted to model context: 0</small></div><div class='attack-block'><span>REQUESTED PRODUCTION ACTION</span><b>{proposed_action}</b><em>{FIREWALL_CHALLENGE['policy_decision']}</em></div></div><p class='live-boundary'><b>WHY THIS IS REAL:</b> {reason} This is a deterministic pre-inference control; no model call is required or made for this block.</p></section>"""
+    return f"""<section class='attack-proof' role='status' aria-live='polite'><div class='live-kicker'>ATTACK TRACE / {FIREWALL_CHALLENGE['id']}</div><h2>The agent never sees the command.</h2><div class='attack-grid'><div class='attack-input'><span>UNTRUSTED TICKET</span><code>{raw_ticket}</code><small>Fingerprint {FIREWALL_CHALLENGE_FINGERPRINT}</small></div><div class='attack-gate'><span>EVIDENCE FIREWALL</span><b>QUARANTINE</b><small>Ticket bytes admitted to model context: 0</small></div><div class='attack-block'><span>REQUESTED PRODUCTION ACTION</span><b>{proposed_action}</b><em>{FIREWALL_CHALLENGE['policy_decision']}</em></div></div><p class='live-boundary'><b>CONTROL BEHAVIOR:</b> {reason} This is a deterministic pre-inference control; no model call is required or made for this block.</p></section>"""
 
 
 def render_case_brief(case_id):
@@ -752,6 +752,7 @@ with gr.Blocks(title="faultfix | agent authority lab", css=CSS, head=HEAD) as de
     verdict = gr.HTML("<section class='result-placeholder' role='status' aria-live='polite'><b>ADVISORY RANKING / OPTIONAL</b><br>The small local model can prioritize a lead. It cannot unlock a fix.</section>", elem_id="ranking-result")
     public_pack_output = gr.HTML("<section class='result-placeholder' role='status' aria-live='polite'><b>EVIDENCE INSPECTION / READY</b><br>Open a public postmortem pack or inspect what the firewall excludes.</section>", elem_id="evidence-result")
     gr.HTML("""<section class='section-heading'><div><span class='section-number'>03 / TEST A LIVE AGENT</span><h2 class='section-title'>The model may suggest. It never self-authorizes.</h2></div><p>Every live pack is a simulated, sanitized evaluation fixture. Faultfix independently decides the action authority.</p></section>""")
+    gr.HTML("<p class='action-note'><b>DATA BOUNDARY</b> / ALL FOUR LIVE-AGENT PACKS ARE SYNTHETIC EVALUATION FIXTURES. USE THE SEPARATELY LABELLED PUBLIC GCE POSTMORTEM PACK FOR PUBLIC-SOURCE EVIDENCE.</p>")
     with gr.Row(equal_height=True):
         case_selector = gr.Dropdown(
             choices=[(case["title"], case["id"]) for case in EVALUATION_PACKS],
