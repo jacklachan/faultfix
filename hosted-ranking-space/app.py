@@ -2,6 +2,7 @@ import json
 from functools import lru_cache
 
 import gradio as gr
+import spaces
 from transformers import pipeline
 
 MODEL_ID = "google/flan-t5-small"
@@ -10,6 +11,12 @@ MODEL_ID = "google/flan-t5-small"
 @lru_cache(maxsize=1)
 def ranker():
     return pipeline("text2text-generation", model=MODEL_ID, device=-1)
+
+
+@spaces.GPU
+def reserve_zero_gpu():
+    """Keeps this ZeroGPU Space compatible while inference remains CPU-safe."""
+    return "GPU ready"
 
 
 def deterministic_order(hypotheses):
