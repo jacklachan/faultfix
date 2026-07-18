@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ACTIONS,
   actionResult,
+  containmentPlan,
   incidentReceipt,
   initialInvestigation,
   nextAction,
@@ -29,6 +30,8 @@ export default function Home() {
   const [showReceipt, setShowReceipt] = useState(false);
   const [showCertificate, setShowCertificate] = useState(false);
   const [showRemediation, setShowRemediation] = useState(false);
+  const [showContainment, setShowContainment] = useState(false);
+  const [containmentApplied, setContainmentApplied] = useState(false);
   const [showReplay, setShowReplay] = useState(false);
   const [showGuardrail, setShowGuardrail] = useState(false);
   const [candidatePoolLimit, setCandidatePoolLimit] = useState(20);
@@ -53,6 +56,10 @@ export default function Home() {
     () => remediationPlan(investigation.completed),
     [investigation.completed],
   );
+  const containment = useMemo(
+    () => containmentPlan(investigation.completed),
+    [investigation.completed],
+  );
   const guardrail = useMemo(
     () => preventionGuardrail(investigation.completed),
     [investigation.completed],
@@ -74,6 +81,7 @@ export default function Home() {
       setShowReceipt(false);
       setShowCertificate(false);
       setShowRemediation(false);
+      setShowContainment(false);
       setShowReplay(false);
       setShowGuardrail(false);
       setShowChallenge(false);
@@ -135,6 +143,8 @@ export default function Home() {
     setShowReceipt(false);
     setShowCertificate(false);
     setShowRemediation(false);
+    setShowContainment(false);
+    setContainmentApplied(false);
     setShowReplay(false);
     setShowGuardrail(false);
     setCandidatePoolLimit(20);
@@ -182,15 +192,21 @@ export default function Home() {
             <em>Then earn the fix.</em>
           </h1>
           <p className={styles.heroCopy}>
-            A release changed one constraint. Two explanations survived the
-            timeline. Only one can survive the evidence.
+            Stabilize the customer first with a bounded, reversible action.
+            Then prove which explanation can survive the evidence.
           </p>
         </div>
         <div className={styles.caseTelemetry}>
           <div>
             <span>CUSTOMER IMPACT</span>
-            <b>Checkout timeout</b>
-            <small>AZ-A / p95 &gt; 30s</small>
+            <b className={containmentApplied ? styles.contained : ""}>
+              {containmentApplied ? "Impact contained" : "Checkout timeout"}
+            </b>
+            <small>
+              {containmentApplied
+                ? "AZ-A / containment active"
+                : "AZ-A / p95 > 30s"}
+            </small>
           </div>
           <div>
             <span>PRIMARY LEAD</span>
@@ -207,8 +223,8 @@ export default function Home() {
         </div>
         <div className={styles.commandDeck}>
           <p>
-            Investigate only what the record can support. Faultfix never turns a
-            plausible lead into a production fix.
+            Contain safely when a recent release is in scope. Faultfix never
+            turns that containment into a causal claim or permanent fix.
           </p>
           {next ? (
             <button className={styles.start} onClick={() => runAction(next.id)}>
@@ -419,10 +435,36 @@ export default function Home() {
             )}
           </div>
           {!gate.complete ? (
-            <div className={styles.locked}>
-              FIXES ARE LOCKED
-              <p>The evidence does not yet support a safe recommendation.</p>
-            </div>
+            <>
+              {containment ? (
+                <div className={styles.containmentReady}>
+                  <span>{containmentApplied ? "[x]" : "[!]"}</span>
+                  <b>
+                    {containmentApplied
+                      ? "Impact containment active."
+                      : "Reversible containment available."}
+                  </b>
+                  <p>
+                    {containmentApplied
+                      ? "The case remains open. Continue gathering evidence before a permanent change."
+                      : "Recent release confirmed. This limits blast radius; it does not prove the cause."}
+                  </p>
+                  <button onClick={() => setShowContainment(true)}>
+                    {containmentApplied
+                      ? "Review containment record ->"
+                      : "Open containment packet ->"}
+                  </button>
+                </div>
+              ) : (
+                <div className={styles.locked}>
+                  PERMANENT FIXES ARE LOCKED
+                  <p>
+                    Gather enough context to identify a bounded, reversible
+                    containment option.
+                  </p>
+                </div>
+              )}
+            </>
           ) : (
             <div className={styles.unlocked}>
               <span>[x]</span>
@@ -768,6 +810,99 @@ export default function Home() {
               This is a simulated review packet. Faultfix will never modify
               infrastructure or deploy a change.
             </p>
+          </div>
+        </section>
+      )}
+      {showContainment && containment && (
+        <section
+          className={phase2.modal}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Reversible containment packet"
+        >
+          <div className={phase2.modalHeader}>
+            <span>CONTAINMENT PACKET / {containment.id}</span>
+            <button
+              aria-label="Close containment packet"
+              onClick={() => setShowContainment(false)}
+            >
+              x
+            </button>
+          </div>
+          <div className={phase2.containmentBody}>
+            <div className={phase2.packetHeadline}>
+              <div>
+                <span className={phase2.rejectedTag}>
+                  IMPACT CONTROL — NOT A ROOT-CAUSE VERDICT
+                </span>
+                <h2>Buy time without rewriting the story.</h2>
+              </div>
+              <span className={phase2.reversible}>↺ REVERSIBLE</span>
+            </div>
+            <p className={phase2.change}>{containment.change}</p>
+            <div className={phase2.containmentWhy}>
+              <b>WHY THIS IS ALLOWED NOW</b>
+              <p>{containment.whyNow}</p>
+            </div>
+            <div className={phase2.packetMeta}>
+              <span>
+                <b>SCOPE</b>
+                {containment.scope}
+              </span>
+              <span>
+                <b>EXPIRY</b>
+                {containment.expiry}
+              </span>
+              <span>
+                <b>HUMAN GATE</b>
+                {containment.approval}
+              </span>
+            </div>
+            <div className={phase2.packetGrid}>
+              <article>
+                <span>01 / PRESERVE BEFORE ACTING</span>
+                <ul>
+                  {containment.preserve.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </article>
+              <article>
+                <span>02 / VERIFY CONTAINMENT</span>
+                <ul>
+                  {containment.verify.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </article>
+              <article className={phase2.haltCard}>
+                <span>03 / STOP IF</span>
+                <ul>
+                  {containment.stop.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </article>
+            </div>
+            <div className={phase2.rollback}>
+              <b>ROLLBACK</b>
+              <p>{containment.rollback}</p>
+            </div>
+            <p className={phase2.noExecution}>
+              This simulated packet changes no traffic. Approval records a
+              containment decision only; causal proof remains incomplete.
+            </p>
+            <button
+              className={phase2.modalClose}
+              onClick={() => {
+                setContainmentApplied(true);
+                setShowContainment(false);
+              }}
+            >
+              {containmentApplied
+                ? "Containment recorded"
+                : "Approve simulated containment"}
+            </button>
           </div>
         </section>
       )}

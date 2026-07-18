@@ -250,6 +250,26 @@
 .remediationBody {
   padding: 25px 5px 8px;
 }
+.containmentBody {
+  padding: 25px 5px 8px;
+}
+.containmentWhy {
+  margin: 0 0 17px;
+  border-left: 2px solid #e9a052;
+  background: #21150d;
+  padding: 11px 13px;
+}
+.containmentWhy b {
+  color: #f4b875;
+  font: 9px var(--font-geist-mono);
+  letter-spacing: 0.08em;
+}
+.containmentWhy p {
+  margin: 5px 0 0;
+  color: #ffe8d8;
+  font-size: 12px;
+  line-height: 1.45;
+}
 .replayBody {
   padding: 25px 5px 8px;
 }

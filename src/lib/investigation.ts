@@ -272,6 +272,53 @@ export type RemediationPlan = {
   rollback: string;
 };
 
+export type ContainmentPlan = {
+  id: string;
+  available: boolean;
+  change: string;
+  whyNow: string;
+  scope: string;
+  expiry: string;
+  approval: string;
+  preserve: string[];
+  verify: string[];
+  stop: string[];
+  rollback: string;
+};
+
+/**
+ * A containment proposal is deliberately weaker than a remediation plan.
+ * It limits customer impact while preserving evidence; it does not assert a cause.
+ */
+export function containmentPlan(completed: ActionId[]): ContainmentPlan | null {
+  if (!completed.includes("diff")) return null;
+  return {
+    id: "FF-CONTAIN-042-A",
+    available: true,
+    change: "Pause r42 promotion and drain AZ-A traffic from r42 instances.",
+    whyNow:
+      "A recent release is confirmed, but the mechanism and competing explanation are still unproven.",
+    scope:
+      "AZ-A payments-api instances running r42 only. Do not modify other zones or configuration values.",
+    expiry: "Expires after 15 minutes unless the incident commander renews it.",
+    approval: "Requires an incident commander to approve the reversible containment step.",
+    preserve: [
+      "Snapshot r42 config, routing state, and the current evidence timeline before traffic is drained.",
+      "Keep the affected r42 instances available for the regression reproduction.",
+    ],
+    verify: [
+      "Checkout error rate falls in the drained AZ-A slice.",
+      "No new zone receives a correlated timeout pattern.",
+    ],
+    stop: [
+      "Traffic drain increases total checkout error rate.",
+      "The containment cannot be reversed within the stated window.",
+    ],
+    rollback:
+      "Restore the previous AZ-A traffic allocation, retain the evidence snapshot, and continue investigation.",
+  };
+}
+
 /** A simulated, reviewable change packet. It never performs a production action. */
 export function remediationPlan(completed: ActionId[]): RemediationPlan | null {
   if (!proofGate(completed).complete) return null;

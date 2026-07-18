@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   actionResult,
+  containmentPlan,
   incidentReceipt,
   nextAction,
   nextEvidencePolicy,
@@ -117,6 +118,14 @@ describe("faultfix proof engine", () => {
     expect(plan?.reversible).toBe(true);
     expect(plan?.scope).toContain("5%");
     expect(plan?.halt).toHaveLength(3);
+  });
+  it("offers reversible containment after a recent release is confirmed without claiming a cause", () => {
+    expect(containmentPlan(["logs", "trace"])).toBeNull();
+    const plan = containmentPlan(["logs", "trace", "diff"]);
+    expect(plan?.change).toContain("Pause r42 promotion");
+    expect(plan?.whyNow).toContain("unproven");
+    expect(plan?.preserve).toHaveLength(2);
+    expect(plan?.approval).toContain("incident commander");
   });
   it("compiles the proved mechanism into a guardrail that blocks recurrence before delivery", () => {
     expect(preventionGuardrail(["logs", "trace", "diff", "config"])).toBeNull();

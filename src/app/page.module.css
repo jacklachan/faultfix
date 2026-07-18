@@ -163,6 +163,9 @@
 .safe {
   color: var(--mint) !important;
 }
+.contained {
+  color: #ffd184 !important;
+}
 .commandDeck {
   grid-column: 1/-1;
   display: flex;
@@ -571,6 +574,45 @@
   color: #e6b370;
   font: 10px var(--font-geist-mono);
   letter-spacing: 0.06em;
+}
+.containmentReady {
+  margin-top: 19px;
+  padding: 13px;
+  border: 1px solid rgba(255, 183, 93, 0.62);
+  background:
+    linear-gradient(125deg, rgba(91, 53, 18, 0.34), rgba(33, 25, 15, 0.2)),
+    rgba(50, 35, 16, 0.2);
+  color: #ffc475;
+  font: 10px var(--font-geist-mono);
+  letter-spacing: 0.06em;
+  box-shadow: inset 3px 0 #e99245;
+}
+.containmentReady b,
+.containmentReady p {
+  display: block;
+}
+.containmentReady b {
+  margin-top: 7px;
+  color: #fff0db;
+  font-size: 11px;
+}
+.containmentReady p {
+  margin: 7px 0 0;
+  color: #bcae9d;
+  font: 11px/1.45 var(--font-geist-sans);
+  letter-spacing: 0;
+}
+.containmentReady button {
+  margin-top: 10px;
+  border: 0;
+  background: transparent;
+  color: #ffd69c;
+  padding: 0;
+  font-size: 11px;
+  cursor: pointer;
+}
+.containmentReady button:hover {
+  color: var(--mint);
 }
 .locked p,
 .unlocked p {
