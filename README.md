@@ -42,7 +42,7 @@ The proof gate is complete only when all four checks are met: direct symptom evi
 - Reversible containment is sent to human review only after a recent release is evidenced.
 - Permanent remediation is blocked until the causal proof gate passes, then remains human-approved and staged.
 
-The authority engine is shared policy, not model output. Once `OPENAI_API_KEY` is configured as a server-side Hugging Face Space secret, the live investigator will select the actions while Faultfix continues to determine whether each one is allowed, reviewed, or blocked.
+The authority engine is shared policy, not model output. The hosted Space can use a server-side `GEMINI_API_KEY` (recommended free option), `GROQ_API_KEY`, or `OPENROUTER_API_KEY` for its live investigator. The model selects an advisory next step from sanitized evidence while Faultfix continues to determine whether each one is allowed, reviewed, or blocked.
 
 ## Evidence Firewall
 
@@ -68,7 +68,7 @@ The terminal-style regression proof is a deterministic visualization of bundled 
 
 Judges can use the public [faultfix ranking Space](https://huggingface.co/spaces/jacklachan/faultfix) without installing Ollama or providing an API key. The proof panel calls its Gradio endpoint only when **Check hosted model** is selected.
 
-The Space runs `google/flan-t5-small` and ranks the two bundled hypotheses. Its output is advisory only: it never changes the evidence sequence, proof score, containment authority, receipt, or permanent-fix gate. The Space and app both fall back safely if a model response is unusable or unavailable.
+The Space runs `google/flan-t5-small` for its zero-key ranking fallback and can use a configured external model for the live investigator and three-pack challenge suite. All model output is advisory only: it never changes the evidence sequence, proof score, containment authority, receipt, or permanent-fix gate. The Space and app both fall back safely if a model response is unusable or unavailable.
 
 ## Lineage
 
