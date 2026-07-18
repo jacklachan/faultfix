@@ -33,6 +33,33 @@ import styles from "./page.module.css";
 import phase2 from "./phase2.module.css";
 import local from "./local-ranking.module.css";
 
+const INCIDENT_CLOCK_START_SECONDS = 42 * 60 + 17;
+
+function IncidentClock() {
+  const [elapsedSeconds, setElapsedSeconds] = useState(INCIDENT_CLOCK_START_SECONDS);
+
+  useEffect(() => {
+    const startedAt = Date.now();
+    const updateClock = () =>
+      setElapsedSeconds(
+        INCIDENT_CLOCK_START_SECONDS + Math.floor((Date.now() - startedAt) / 1000),
+      );
+    updateClock();
+    const interval = window.setInterval(updateClock, 1000);
+    return () => window.clearInterval(interval);
+  }, []);
+
+  const hours = Math.floor(elapsedSeconds / 3600).toString().padStart(2, "0");
+  const minutes = Math.floor((elapsedSeconds % 3600) / 60).toString().padStart(2, "0");
+  const seconds = (elapsedSeconds % 60).toString().padStart(2, "0");
+
+  return (
+    <div className={styles.clock}>
+      INCIDENT CLOCK <b>{`${hours}:${minutes}:${seconds}`}</b>
+    </div>
+  );
+}
+
 export default function Home() {
   const [investigation, setInvestigation] = useState(initialInvestigation);
   const [selected, setSelected] = useState<string | null>(null);
@@ -254,9 +281,7 @@ export default function Home() {
           EVIDENCE FIREWALL
         </button>
         <div className={styles.simulated}>SIMULATED / SAFE TO EXPLORE</div>
-        <div className={styles.clock}>
-          INCIDENT CLOCK <b>00:42:17</b>
-        </div>
+        <IncidentClock />
       </header>
       <section className={styles.incidentBar}>
         <div className={styles.incidentTitle}>

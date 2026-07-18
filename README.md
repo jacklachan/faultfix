@@ -48,6 +48,8 @@ The authority engine is shared policy, not model output. The hosted Space prefer
 
 Before an agent receives an evidence pack, Faultfix applies a separate **Evidence Firewall**. Each artifact carries a stable content fingerprint, source trust class, and observation time. The firewall admits normalized records from trusted sources, quarantines untrusted or instruction-like material so its raw text cannot become model context, and excludes any fact that appeared after the replay cutoff. It then produces a small policy receipt with the evidence-pack fingerprint, admitted artifacts, and excluded artifacts.
 
+The demo's instruction-like-content checks are illustrative signals, not a claim that a handful of regexes solves prompt injection. The actual boundary is the trust taxonomy and replay policy: untrusted raw text is quarantined by default and cannot become model context or action authority.
+
 This prevents two common ways an incident demo can become unsafe or misleading: a hostile string in a log/ticket influencing the agent, and a model benefiting from facts that were unavailable at the moment of the decision. The firewall is additive: passing it does not prove causality and cannot unlock a permanent change. Faultfix still requires the independent causal proof gate and human review.
 
 Human review issues a narrow **Action Lease**, not standing agent permission. A lease binds one containment command, its exact resource scope, the reviewed evidence fingerprint, and a short review window. It automatically becomes stale when the evidence pack changes, forcing the agent to pause for re-authorization rather than applying an old approval to a changed incident.
@@ -69,6 +71,16 @@ The terminal-style regression proof is a deterministic visualization of bundled 
 Judges can use the public [faultfix ranking Space](https://huggingface.co/spaces/jacklachan/faultfix) without installing Ollama or providing an API key. The proof panel calls its Gradio endpoint only when **Check hosted model** is selected.
 
 The Space runs `google/flan-t5-small` for its zero-key ranking fallback and can use a configured external model for the live investigator and three-pack challenge suite. All model output is advisory only: it never changes the evidence sequence, proof score, containment authority, receipt, or permanent-fix gate. The Space and app both fall back safely if a model response is unusable or unavailable.
+
+## Publish the Space
+
+`hosted-ranking-space/` in this repository is the source of truth for the public Space. Do not edit the Space's browser-based Files tab. After committing a Space change, publish that exact committed directory with:
+
+```powershell
+.\scripts\sync-space.ps1
+```
+
+The script refuses to deploy uncommitted Space files and writes the source commit into the Hugging Face commit message. It uses the existing local Hugging Face login and never reads or prints a token.
 
 ## Lineage
 
