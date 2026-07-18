@@ -44,20 +44,13 @@ The primary button advances one action at a time; the action rail makes the same
 
 The terminal-style regression proof shown in the interface is a deterministic visualization of the bundled test evidence, not a command that runs against a live service.
 
-## Optional local Ollama ranking
+## Optional hosted model ranking
 
-faultfix can ask a local Ollama model to rank the two hypotheses as an advisory signal. It is off by default; use **Check Ollama ranking** in the proof panel only if Ollama is already running locally.
+Judges can use the public [faultfix ranking Space](https://huggingface.co/spaces/jacklachan/faultfix) without installing Ollama or providing an API key. The proof panel calls its Gradio endpoint only when **Check hosted model** is selected.
 
-The UI calls `http://127.0.0.1:11434/api/chat` with model `llama3.2`, requests JSON, and waits at most five seconds. To prepare that default model:
+The Space runs `google/flan-t5-small` and asks it which of the two bundled hypotheses most directly explains the simulated incident. Its answer becomes a complete displayed order only after the returned ID is validated. The Space itself falls back to the known deterministic order if the model cannot provide a usable answer, and the app does the same if the Space is cold or unavailable.
 
-```bash
-ollama pull llama3.2
-ollama serve
-```
-
-Ollama documents its default local API base URL as `http://localhost:11434/api`, its `/api/chat` endpoint, and the `ollama pull` / `ollama serve` commands. See the [Ollama API introduction](https://docs.ollama.com/api/introduction), [chat API](https://docs.ollama.com/api/chat), and [CLI reference](https://docs.ollama.com/cli).
-
-Only a valid, complete, unique ordering of the known hypothesis IDs is displayed. If Ollama is offline, rejects the request, times out, or returns malformed/partial/duplicate IDs, faultfix retains its deterministic order and explains that fallback in the UI. In every outcome, the ranking is advisory only: it never changes the evidence sequence, proof score, receipt, or fix gate.
+In every outcome, the ranking is advisory only: it never changes the evidence sequence, proof score, receipt, or fix gate.
 
 ## Lineage
 
@@ -65,4 +58,4 @@ faultfix is new Build Week product work. Its team previously placed 14th in the 
 
 ## Development note
 
-Codex/GPT-5.6 was used during development to structure the deterministic evidence model, build the interface, and author test coverage. It is not required at runtime; Faultline’s deterministic proof engine is the source of truth.
+Codex/GPT-5.6 was used during development to structure the deterministic evidence model, build the interface, and author test coverage. It is not required at runtime; faultfix’s deterministic proof engine is the source of truth.

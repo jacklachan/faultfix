@@ -1,7 +1,7 @@
 export type Hypothesis = { id: string; claim: string };
 
 export type RankingResult = {
-  source: "ollama" | "deterministic";
+  source: "ollama" | "huggingface-space" | "deterministic";
   status: "ranked" | "unavailable" | "invalid-response";
   rankedIds: string[];
   detail: string;
