@@ -8,6 +8,8 @@ import {
   POLICY_REWARD,
   proofCertificate,
   proofGate,
+  preventionGuardrail,
+  evaluatePoolLimitGuardrail,
   remediationPlan,
 } from "./investigation";
 
@@ -115,5 +117,20 @@ describe("faultfix proof engine", () => {
     expect(plan?.reversible).toBe(true);
     expect(plan?.scope).toContain("5%");
     expect(plan?.halt).toHaveLength(3);
+  });
+  it("compiles the proved mechanism into a guardrail that blocks recurrence before delivery", () => {
+    expect(preventionGuardrail(["logs", "trace", "diff", "config"])).toBeNull();
+    expect(
+      preventionGuardrail([
+        "logs",
+        "trace",
+        "diff",
+        "config",
+        "infra",
+        "regression",
+      ])?.invariant,
+    ).toContain("40");
+    expect(evaluatePoolLimitGuardrail(20).allowed).toBe(false);
+    expect(evaluatePoolLimitGuardrail(40).allowed).toBe(true);
   });
 });

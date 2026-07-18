@@ -304,6 +304,43 @@ export function remediationPlan(completed: ActionId[]): RemediationPlan | null {
   };
 }
 
+export type PreventionGuardrail = {
+  id: string;
+  sourceReceipt: string;
+  invariant: string;
+  appliesTo: string;
+  verify: string;
+  exception: string;
+};
+
+export function preventionGuardrail(
+  completed: ActionId[],
+): PreventionGuardrail | null {
+  if (!proofGate(completed).complete) return null;
+  return {
+    id: "FF-GUARD-042-POOL",
+    sourceReceipt: "FF-INC-042-R42",
+    invariant:
+      "DATABASE_POOL_LIMIT must remain at or above 40 for payments-api.",
+    appliesTo: "Production configuration changes to payments-api.",
+    verify:
+      "Run connection-pool.regression and require the AZ-A request path to complete within 300ms.",
+    exception:
+      "A lower limit requires a new causal certificate, an updated regression threshold, and an approved staged canary.",
+  };
+}
+
+export function evaluatePoolLimitGuardrail(poolLimit: number) {
+  const allowed = Number.isFinite(poolLimit) && poolLimit >= 40;
+  return {
+    allowed,
+    title: allowed ? "Eligible for staged canary" : "Blocked before deployment",
+    detail: allowed
+      ? `r43 preserves DATABASE_POOL_LIMIT=${poolLimit}. The change still requires the canary checks in the safe change packet.`
+      : `r43 sets DATABASE_POOL_LIMIT=${poolLimit}. This recreates the recorded failure mechanism from INC-042, so Faultfix blocks the deploy.`,
+  };
+}
+
 export function incidentReceipt(completed: ActionId[]) {
   if (!proofGate(completed).complete) return null;
   return {

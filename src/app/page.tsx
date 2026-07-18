@@ -11,7 +11,9 @@ import {
   POLICY_REWARD,
   proofCertificate,
   proofGate,
+  preventionGuardrail,
   remediationPlan,
+  evaluatePoolLimitGuardrail,
   type ActionId,
 } from "@/lib/investigation";
 import { type RankingResult } from "@/lib/local-ranking";
@@ -28,6 +30,8 @@ export default function Home() {
   const [showCertificate, setShowCertificate] = useState(false);
   const [showRemediation, setShowRemediation] = useState(false);
   const [showReplay, setShowReplay] = useState(false);
+  const [showGuardrail, setShowGuardrail] = useState(false);
+  const [candidatePoolLimit, setCandidatePoolLimit] = useState(20);
   const [showChallenge, setShowChallenge] = useState(false);
   const [localRanking, setLocalRanking] = useState<RankingResult | null>(null);
   const [isCheckingLocalRanking, setIsCheckingLocalRanking] = useState(false);
@@ -49,6 +53,14 @@ export default function Home() {
     () => remediationPlan(investigation.completed),
     [investigation.completed],
   );
+  const guardrail = useMemo(
+    () => preventionGuardrail(investigation.completed),
+    [investigation.completed],
+  );
+  const guardrailEvaluation = useMemo(
+    () => evaluatePoolLimitGuardrail(candidatePoolLimit),
+    [candidatePoolLimit],
+  );
   const next = nextAction(investigation.completed);
   const policy = useMemo(
     () => nextEvidencePolicy(investigation.completed),
@@ -63,6 +75,7 @@ export default function Home() {
       setShowCertificate(false);
       setShowRemediation(false);
       setShowReplay(false);
+      setShowGuardrail(false);
       setShowChallenge(false);
     }
     window.addEventListener("keydown", closeOnEscape);
@@ -123,6 +136,8 @@ export default function Home() {
     setShowCertificate(false);
     setShowRemediation(false);
     setShowReplay(false);
+    setShowGuardrail(false);
+    setCandidatePoolLimit(20);
     setShowChallenge(false);
   }
   function exportReceipt() {
@@ -418,6 +433,9 @@ export default function Home() {
               </button>
               <button onClick={() => setShowRemediation(true)}>
                 Open safe change packet -&gt;
+              </button>
+              <button onClick={() => setShowGuardrail(true)}>
+                Compile prevention guardrail -&gt;
               </button>
               <button onClick={() => setShowProof(true)}>
                 View candidate patch -&gt;
@@ -749,6 +767,91 @@ export default function Home() {
             <p className={phase2.noExecution}>
               This is a simulated review packet. Faultfix will never modify
               infrastructure or deploy a change.
+            </p>
+          </div>
+        </section>
+      )}
+      {showGuardrail && guardrail && (
+        <section
+          className={phase2.modal}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Causal prevention guardrail"
+        >
+          <div className={phase2.modalHeader}>
+            <span>CAUSAL GUARDRAIL / {guardrail.id}</span>
+            <button
+              aria-label="Close causal guardrail"
+              onClick={() => setShowGuardrail(false)}
+            >
+              x
+            </button>
+          </div>
+          <div className={phase2.guardrailBody}>
+            <span className={phase2.rejectedTag}>
+              INCIDENT RECEIPT → DELIVERY POLICY
+            </span>
+            <h2>Seal the fault line.</h2>
+            <p>
+              Faultfix compiles the proved failure mechanism into a release
+              check. The next deploy is tested against the lesson before users
+              are exposed to it.
+            </p>
+            <div className={phase2.compilerFlow}>
+              <span>INC-042 PROOF</span>
+              <i>→</i>
+              <span>CAUSAL INVARIANT</span>
+              <i>→</i>
+              <span>CI / CANARY CHECK</span>
+            </div>
+            <section className={phase2.guardrailSpec}>
+              <div>
+                <span>INVARIANT</span>
+                <b>{guardrail.invariant}</b>
+              </div>
+              <div>
+                <span>APPLIES TO</span>
+                <p>{guardrail.appliesTo}</p>
+              </div>
+              <div>
+                <span>VERIFY</span>
+                <p>{guardrail.verify}</p>
+              </div>
+              <div>
+                <span>EXCEPTION PATH</span>
+                <p>{guardrail.exception}</p>
+              </div>
+            </section>
+            <section className={phase2.deploySimulator}>
+              <div>
+                <span>SIMULATED FUTURE CHANGE / r43</span>
+                <b>DATABASE_POOL_LIMIT =</b>
+              </div>
+              <input
+                aria-label="Candidate pool limit"
+                type="number"
+                min="1"
+                max="100"
+                value={candidatePoolLimit}
+                onChange={(event) =>
+                  setCandidatePoolLimit(Number(event.target.value))
+                }
+              />
+              <div
+                className={`${phase2.simResult} ${guardrailEvaluation.allowed ? phase2.simAllowed : phase2.simBlocked}`}
+              >
+                <span>
+                  {guardrailEvaluation.allowed
+                    ? "CANARY ELIGIBLE"
+                    : "DEPLOY BLOCKED"}
+                </span>
+                <b>{guardrailEvaluation.title}</b>
+                <p>{guardrailEvaluation.detail}</p>
+              </div>
+            </section>
+            <p className={phase2.noExecution}>
+              This is a deterministic delivery simulation. No repository, CI
+              pipeline, or production configuration is changed.
             </p>
           </div>
         </section>
