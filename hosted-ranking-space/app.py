@@ -292,8 +292,18 @@ def invoke_live_model(prompt):
 
 
 def normalize_live_answer(text):
+    candidate = str(text or "").strip()
+    if candidate.startswith("```"):
+        candidate = candidate.split("\n", 1)[1] if "\n" in candidate else ""
+        if candidate.endswith("```"):
+            candidate = candidate[:-3].strip()
+    if not candidate.startswith("{"):
+        start = candidate.find("{")
+        end = candidate.rfind("}")
+        if start >= 0 and end > start:
+            candidate = candidate[start : end + 1]
     try:
-        answer = json.loads(text)
+        answer = json.loads(candidate)
     except (TypeError, json.JSONDecodeError):
         return {
             "hypothesis": "insufficient-evidence",
