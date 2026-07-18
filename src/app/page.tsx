@@ -121,37 +121,69 @@ export default function Home() {
     <main className={styles.workbench}>
       <header className={styles.header}>
         <div className={styles.wordmark}>
-          <span className={styles.mark}>*</span> faultfix{" "}
+          <span className={styles.mark}>✦</span> faultfix{" "}
           <small>incident investigator</small>
         </div>
-        <div className={styles.simulated}>SIMULATED INCIDENT</div>
+        <div className={styles.headerSignal}>
+          <i /> PROOF PROTOCOL v1.0
+        </div>
+        <div className={styles.simulated}>SIMULATED / SAFE TO EXPLORE</div>
         <div className={styles.clock}>
           INCIDENT CLOCK <b>00:42:17</b>
         </div>
       </header>
       <section className={styles.incidentBar}>
-        <div>
-          <span className={styles.eyebrow}>INC-042 / PAYMENTS</span>
+        <div className={styles.incidentTitle}>
+          <span className={styles.eyebrow}>
+            INCIDENT 042 <i /> PAYMENTS / SEV-1
+          </span>
           <h1>
-            Payments failing after <em>r42</em>
+            Prove the cause.
+            <br />
+            <em>Then earn the fix.</em>
           </h1>
+          <p className={styles.heroCopy}>
+            A release changed one constraint. Two explanations survived the
+            timeline. Only one can survive the evidence.
+          </p>
         </div>
-        <p>
-          Investigate only what the record can support. Fixes remain locked
-          until the causal case is complete.
-        </p>
-        {next ? (
-          <button className={styles.start} onClick={() => runAction(next.id)}>
-            {investigation.completed.length
-              ? `Continue: ${next.label}`
-              : "Start investigation"}{" "}
-            <span>-&gt;</span>
-          </button>
-        ) : (
-          <button className={styles.start} onClick={resetInvestigation}>
-            Reset investigation
-          </button>
-        )}
+        <div className={styles.caseTelemetry}>
+          <div>
+            <span>CUSTOMER IMPACT</span>
+            <b>Checkout timeout</b>
+            <small>AZ-A / p95 &gt; 30s</small>
+          </div>
+          <div>
+            <span>PRIMARY LEAD</span>
+            <b>Release r42</b>
+            <small>14:03 UTC</small>
+          </div>
+          <div>
+            <span>PROOF STATE</span>
+            <b className={gate.complete ? styles.safe : ""}>
+              {gate.complete ? "Established" : "Not established"}
+            </b>
+            <small>{gate.score} / 4 gates verified</small>
+          </div>
+        </div>
+        <div className={styles.commandDeck}>
+          <p>
+            Investigate only what the record can support. Faultfix never turns a
+            plausible lead into a production fix.
+          </p>
+          {next ? (
+            <button className={styles.start} onClick={() => runAction(next.id)}>
+              {investigation.completed.length
+                ? `Inspect: ${next.label}`
+                : "Begin evidence protocol"}{" "}
+              <span>→</span>
+            </button>
+          ) : (
+            <button className={styles.start} onClick={resetInvestigation}>
+              Reset investigation <span>↺</span>
+            </button>
+          )}
+        </div>
       </section>
       <div className={styles.grid}>
         <aside className={styles.actions}>
