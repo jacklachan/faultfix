@@ -27,7 +27,7 @@ The credibility anchors are OWASP’s excessive-agency guidance and DeepMind’s
 
 1. **Open with failure (15 seconds).** “An agent sees a DNS blip, follows an untrusted ticket, and proposes a global production change. The problem is not that the agent was unintelligent. Nothing made it earn the right to act.”
 2. **Run “block a hostile production command” (20 seconds).** Point out the hostile ticket, the `0` ticket bytes admitted to model context, and the permanent global action marked `BLOCK`. This is deterministic pre-inference enforcement, so it costs nothing and makes no model call.
-3. **Run the four-pack live challenge suite (30 seconds).** Say: “Now the live model works across capacity, DNS, identity, and insufficient-evidence cases. It suggests; Faultfix governs.” Highlight that the injection case is quarantined, while every answer is schema-validated.
+3. **Run the four-pack live challenge suite when a hosted provider is configured (30 seconds).** Say: “The live model can work across capacity, DNS, identity, and insufficient-evidence cases. It suggests; Faultfix governs.” Highlight that the injection case is quarantined, while every answer is schema-validated. If the provider is unavailable, lead with the deterministic hostile-ticket block and authority trace instead; the product never fabricates a model result.
 4. **Walk the INC-042 proof path (45 seconds).** Show the bounded reversible containment first. Then complete the evidence chain and regression. Emphasize that containment did not become a causal verdict or permanent fix.
 5. **Close (10 seconds).** “The product is not another incident chatbot. It is an authority layer for whatever agent a team chooses.”
 

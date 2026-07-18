@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="920" viewBox="0 0 1600 920" role="img" aria-labelledby="title desc">
+  <title id="title">Faultfix evidence-bound agent authority map</title>
+  <desc id="desc">Untrusted and trusted incident evidence flow through an evidence firewall to a model adviser and a deterministic policy gate. The gate allows reads, requires review for containment, and blocks permanent writes.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#061112"/>
+      <stop offset=".56" stop-color="#0a2020"/>
+      <stop offset="1" stop-color="#071012"/>
+    </linearGradient>
+    <linearGradient id="mint" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#91efc9"/>
+      <stop offset="1" stop-color="#46b995"/>
+    </linearGradient>
+    <linearGradient id="amber" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#ffd28c"/>
+      <stop offset="1" stop-color="#e48a42"/>
+    </linearGradient>
+    <linearGradient id="coral" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#ffb0a3"/>
+      <stop offset="1" stop-color="#e66d60"/>
+    </linearGradient>
+    <filter id="glow" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M44 0H0V44" fill="none" stroke="#7ee4bf" stroke-opacity=".08"/>
+    </pattern>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto">
+      <path d="M0 0L10 6L0 12" fill="none" stroke="#78e4bd" stroke-width="2"/>
+    </marker>
+    <style>
+      .k { font: 700 17px 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace; letter-spacing: 3px; }
+      .label { font: 700 15px 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace; letter-spacing: 2px; }
+      .body { font: 500 20px Inter, Arial, sans-serif; }
+      .small { font: 500 16px Inter, Arial, sans-serif; }
+      .value { font: 700 24px Inter, Arial, sans-serif; }
+      .hero { font: 700 88px 'Space Grotesk', Inter, Arial, sans-serif; letter-spacing: -5px; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="920" fill="url(#bg)"/>
+  <rect width="1600" height="920" fill="url(#grid)"/>
+  <path d="M70 156H1530" stroke="#2e5550"/>
+  <path d="M70 157H320" stroke="#78e4bd" stroke-width="3" filter="url(#glow)"/>
+
+  <text x="72" y="72" class="k" fill="#f9c779">FAULTFIX / AUTHORITY MAP</text>
+  <text x="72" y="136" class="hero" fill="#effaf4">Prove before you act.</text>
+  <text x="1045" y="68" class="label" fill="#78e4bd">MODEL OUTPUT: ADVISORY</text>
+  <text x="1045" y="100" class="label" fill="#f9c779">POLICY OUTPUT: ENFORCED</text>
+
+  <g transform="translate(72 230)">
+    <text class="k" fill="#88c5af">01 / INCIDENT INPUTS</text>
+    <rect y="35" width="295" height="104" rx="10" fill="#0b1b1d" stroke="#315a55"/>
+    <rect y="35" width="5" height="104" rx="2" fill="#78e4bd"/>
+    <text x="26" y="73" class="label" fill="#78e4bd">TRUSTED</text>
+    <text x="26" y="107" class="value" fill="#eaf6f0">r42 deploy diff</text>
+    <text x="26" y="130" class="small" fill="#afc7bd">configuration change</text>
+
+    <rect y="157" width="295" height="104" rx="10" fill="#0b1b1d" stroke="#315a55"/>
+    <rect y="157" width="5" height="104" rx="2" fill="#78e4bd"/>
+    <text x="26" y="195" class="label" fill="#78e4bd">TRUSTED</text>
+    <text x="26" y="229" class="value" fill="#eaf6f0">AZ-A telemetry</text>
+    <text x="26" y="252" class="small" fill="#afc7bd">direct symptom</text>
+
+    <rect y="279" width="295" height="104" rx="10" fill="#211313" stroke="#894d45"/>
+    <rect y="279" width="5" height="104" rx="2" fill="#ef8176"/>
+    <text x="26" y="317" class="label" fill="#ffaaa0">UNTRUSTED</text>
+    <text x="26" y="351" class="value" fill="#fff0ec">external ticket</text>
+    <text x="26" y="374" class="small" fill="#d2aaa3">instruction-shaped text</text>
+  </g>
+
+  <path d="M390 408H540" stroke="#78e4bd" stroke-width="3" marker-end="url(#arrow)"/>
+  <path d="M390 563H540" stroke="#ef8176" stroke-width="3" stroke-dasharray="8 9" marker-end="url(#arrow)"/>
+
+  <g transform="translate(555 266)">
+    <rect width="285" height="364" rx="16" fill="#151e1a" stroke="#d88a4b" stroke-width="2"/>
+    <path d="M24 0V364M261 0V364" stroke="#e6a258" stroke-opacity=".2"/>
+    <text x="28" y="51" class="k" fill="#f8bd6c">02 / FIREWALL</text>
+    <text x="28" y="96" class="value" fill="#fff4e9">Evidence</text>
+    <text x="28" y="125" class="value" fill="#fff4e9">admission gate</text>
+    <path d="M28 155H257" stroke="#6d5238"/>
+    <text x="28" y="195" class="label" fill="#78e4bd">ADMIT</text>
+    <text x="28" y="225" class="body" fill="#d5e9df">trusted, time-bounded facts</text>
+    <text x="28" y="271" class="label" fill="#ffaaa0">QUARANTINE</text>
+    <text x="28" y="301" class="body" fill="#d5e9df">raw instructions and poisoned text</text>
+    <text x="28" y="340" class="small" fill="#f4c183">model sees sanitized context only</text>
+  </g>
+
+  <path d="M855 448H980" stroke="#78e4bd" stroke-width="3" marker-end="url(#arrow)"/>
+  <g transform="translate(995 310)">
+    <rect width="255" height="280" rx="16" fill="#0b1d1d" stroke="#4b8678" stroke-width="2"/>
+    <circle cx="54" cy="54" r="23" fill="#1c6d59" stroke="#88e8c3" stroke-width="2"/>
+    <path d="M43 54h22M54 43v22" stroke="#dffff2" stroke-width="3"/>
+    <text x="30" y="112" class="k" fill="#86e5bf">03 / INVESTIGATOR</text>
+    <text x="30" y="157" class="value" fill="#effaf4">Model recommends</text>
+    <text x="30" y="186" class="value" fill="#effaf4">next evidence</text>
+    <path d="M30 216H225" stroke="#315f56"/>
+    <text x="30" y="248" class="small" fill="#b8d0c6">No model claim can unlock a</text>
+    <text x="30" y="270" class="small" fill="#b8d0c6">permanent production change.</text>
+  </g>
+
+  <path d="M1265 448H1350" stroke="#78e4bd" stroke-width="3" marker-end="url(#arrow)"/>
+  <g transform="translate(1360 244)">
+    <text class="k" fill="#86e5bf">04 / POLICY</text>
+    <rect y="35" width="172" height="98" rx="10" fill="#0f2b25" stroke="#62cda6"/>
+    <text x="18" y="70" class="label" fill="#8ceac5">READ ONLY</text>
+    <text x="18" y="108" class="value" fill="#effaf4">ALLOW</text>
+    <rect y="151" width="172" height="98" rx="10" fill="#2b2417" stroke="#e4a157"/>
+    <text x="18" y="186" class="label" fill="#ffd18f">CONTAINMENT</text>
+    <text x="18" y="224" class="value" fill="#fff4e1">REVIEW</text>
+    <rect y="267" width="172" height="98" rx="10" fill="#311413" stroke="#ee8176"/>
+    <text x="18" y="302" class="label" fill="#ffaaa0">PERMANENT</text>
+    <text x="18" y="340" class="value" fill="#fff0ec">BLOCK</text>
+  </g>
+
+  <g transform="translate(72 760)">
+    <rect width="1456" height="92" rx="12" fill="#0a1919" stroke="#315a55"/>
+    <path d="M0 46H1456" stroke="#315a55" stroke-dasharray="4 8"/>
+    <text x="24" y="36" class="label" fill="#f8bd6c">AUTHORITY INVARIANT</text>
+    <text x="24" y="70" class="body" fill="#d9ebe3">Plausibility is not proof. A model can suggest; only evidence, policy, and human review can create action authority.</text>
+  </g>
+</svg>
