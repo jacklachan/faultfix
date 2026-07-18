@@ -198,7 +198,7 @@ Do not claim a permanent change is authorized. The policy layer, not you, decide
 
 def configured_provider():
     if os.getenv("HF_TOKEN"):
-        return "Hugging Face Inference Providers", os.getenv("HF_MODEL", "openai/gpt-oss-120b")
+        return "Hugging Face Inference Providers", os.getenv("HF_MODEL", "Qwen/Qwen3-235B-A22B-Instruct-2507")
     if os.getenv("GEMINI_API_KEY"):
         return "Gemini", os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
     if os.getenv("GROQ_API_KEY"):
