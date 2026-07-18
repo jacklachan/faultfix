@@ -780,9 +780,11 @@
   }
   .headerSignal,
   .policyButton,
-  .firewallButton,
   .clock {
     display: none;
+  }
+  .firewallButton {
+    justify-self: start;
   }
   .simulated {
     justify-self: end;

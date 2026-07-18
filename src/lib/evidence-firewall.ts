@@ -50,6 +50,11 @@ const INSTRUCTION_PATTERNS = [
   /\bauthorize\s+(a\s+)?(production|permanent|global)\b/i,
 ];
 
+function parseInstant(value: string): number | null {
+  const instant = Date.parse(value);
+  return Number.isFinite(instant) ? instant : null;
+}
+
 function fingerprint(value: unknown) {
   // Deterministic UI-safe content fingerprint. The hosted Space uses SHA-256
   // for persisted packs; this browser-safe demo intentionally avoids a Node
@@ -76,7 +81,19 @@ export function screenEvidence(
   replayCutoff: string,
 ): ScreenedArtifact {
   const artifactFingerprint = fingerprint(artifact);
-  if (artifact.observedAt > replayCutoff) {
+  const observedAt = parseInstant(artifact.observedAt);
+  const cutoff = parseInstant(replayCutoff);
+  if (observedAt === null || cutoff === null) {
+    return {
+      ...artifact,
+      fingerprint: artifactFingerprint,
+      disposition: "future",
+      modelContext: null,
+      reason:
+        "Timestamp could not be verified; excluded to prevent uncertain replay ordering.",
+    };
+  }
+  if (observedAt > cutoff) {
     return {
       ...artifact,
       fingerprint: artifactFingerprint,
@@ -176,7 +193,16 @@ export function evaluateContainmentLease(
     resourceScope: string;
   },
 ): { status: LeaseStatus; reason: string } {
-  if (request.at > lease.expiresAt) {
+  const requestedAt = parseInstant(request.at);
+  const expiresAt = parseInstant(lease.expiresAt);
+  if (requestedAt === null || expiresAt === null) {
+    return {
+      status: "expired",
+      reason:
+        "The approval window could not be verified; containment is paused pending a fresh review.",
+    };
+  }
+  if (requestedAt > expiresAt) {
     return {
       status: "expired",
       reason: "The approval window has expired; the incident commander must review the current record again.",

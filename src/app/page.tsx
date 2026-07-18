@@ -257,7 +257,7 @@ export default function Home() {
       <header className={styles.header}>
         <div className={styles.wordmark}>
           <span className={styles.mark}>✦</span> faultfix{" "}
-          <small>incident investigator</small>
+          <small>agent authority layer</small>
         </div>
         <div className={styles.headerSignal}>
           <i /> PROOF PROTOCOL v1.0
@@ -896,9 +896,9 @@ export default function Home() {
               </div>
             )}
             <p className={phase2.noExecution}>
-              This run is deterministic until an OpenAI key is configured. The
-              same authority policy will wrap the hosted investigator; a model
-              will never grant itself write authority.
+              The same authority policy wraps the hosted investigator on the
+              public Space. A model can recommend a next step, but it never
+              grants itself write authority.
             </p>
           </div>
         </section>

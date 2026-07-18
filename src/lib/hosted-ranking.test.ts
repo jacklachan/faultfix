@@ -14,4 +14,26 @@ describe("hosted ranking adapter", () => {
     const result = await rankHypothesesWithHostedSpace(hypotheses, { fetcher: async () => ({ ok: false, json: async () => ({}), text: async () => "" }) });
     expect(result).toMatchObject({ source: "deterministic", rankedIds: ["pool-limit", "dns-event"] });
   });
+
+  it("times out a stalled Space request and retains deterministic ordering", async () => {
+    let receivedSignal: AbortSignal | undefined;
+    const fetcher = (_url: string, init?: RequestInit) =>
+      new Promise<{ ok: boolean; json: () => Promise<unknown>; text: () => Promise<string> }>((_resolve, reject) => {
+        receivedSignal = init?.signal ?? undefined;
+        if (init?.signal?.aborted) {
+          reject(new Error("aborted"));
+          return;
+        }
+        init?.signal?.addEventListener("abort", () => reject(new Error("aborted")), { once: true });
+      });
+
+    const result = await rankHypothesesWithHostedSpace(hypotheses, {
+      fetcher,
+      timeoutMs: 1,
+    });
+
+    expect(receivedSignal).toBeDefined();
+    expect(receivedSignal?.aborted).toBe(true);
+    expect(result).toMatchObject({ source: "deterministic", status: "unavailable" });
+  });
 });

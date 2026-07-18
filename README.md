@@ -94,7 +94,7 @@ The Space runs `google/flan-t5-small` for its zero-key ranking fallback and can 
 .\scripts\sync-space.ps1
 ```
 
-The script refuses to deploy uncommitted Space files and writes the source commit into the Hugging Face commit message. It uses the existing local Hugging Face login and never reads or prints a token.
+The script refuses to deploy uncommitted or unexpected Space files, uploads only the explicit `README.md`, `app.py`, and `requirements.txt` allowlist, and removes stale remote source artifacts such as `.env` files and `__pycache__`. It pins the Hugging Face commit it inspected as the parent of its upload, so a concurrent browser-side edit causes the sync to fail instead of being silently overwritten. It uses the existing local Hugging Face login and never reads or prints a token. Use `-DryRun` to inspect the exact upload and remote cleanup without publishing.
 
 ## Lineage
 

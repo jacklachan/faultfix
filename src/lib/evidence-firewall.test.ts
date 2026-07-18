@@ -21,6 +21,20 @@ describe("evidence firewall", () => {
     expect(screened.disposition).toBe("future");
   });
 
+  it("compares replay timestamps as instants and fails closed on invalid ones", () => {
+    const offsetTimestamp = screenEvidence(
+      { ...FIREWALL_DEMO_ARTIFACTS[0], observedAt: "2026-07-18T15:00:00+01:00" },
+      FIREWALL_DEMO_CUTOFF,
+    );
+    expect(offsetTimestamp.disposition).toBe("admit");
+
+    const invalidTimestamp = screenEvidence(
+      { ...FIREWALL_DEMO_ARTIFACTS[0], observedAt: "not-a-timestamp" },
+      FIREWALL_DEMO_CUTOFF,
+    );
+    expect(invalidTimestamp).toMatchObject({ disposition: "future", modelContext: null });
+  });
+
   it("records a stable audit receipt and admits trusted observed facts", () => {
     const receipt = evidenceFirewallReceipt(FIREWALL_DEMO_ARTIFACTS, FIREWALL_DEMO_CUTOFF);
     expect(receipt.admitted).toEqual(["deploy-r42", "pool-saturation"]);
@@ -66,5 +80,25 @@ describe("evidence firewall", () => {
         resourceScope: "all regions",
       }).status,
     ).toBe("scope-violation");
+  });
+
+  it("evaluates approval windows as instants and fails closed on invalid timestamps", () => {
+    const lease = issueContainmentLease("PACK-123");
+    expect(
+      evaluateContainmentLease(lease, {
+        at: "2026-07-18T15:00:00+01:00",
+        evidenceFingerprint: "PACK-123",
+        action: lease.action,
+        resourceScope: lease.resourceScope,
+      }).status,
+    ).toBe("valid");
+    expect(
+      evaluateContainmentLease(lease, {
+        at: "not-a-timestamp",
+        evidenceFingerprint: "PACK-123",
+        action: lease.action,
+        resourceScope: lease.resourceScope,
+      }).status,
+    ).toBe("expired");
   });
 });

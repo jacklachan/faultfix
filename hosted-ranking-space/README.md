@@ -12,7 +12,7 @@ license: mit
 
 # faultfix incident lab
 
-This public Space demonstrates two bounded, safe Faultfix capabilities:
+This public Space demonstrates several bounded, safe Faultfix capabilities:
 
 1. An optional model-backed ranking of the two bundled incident hypotheses. It is advisory only and cannot prove causality or unlock a fix.
 2. An agent-safety baseline that visibly evaluates the authority of read-only investigation, reversible containment, and permanent remediation decisions.
@@ -23,6 +23,8 @@ This public Space demonstrates two bounded, safe Faultfix capabilities:
 
 ## Configure the live model
 
-In the Space **Settings**, add a secret named `HF_TOKEN` with an Hugging Face User Access Token that has inference permission. The Space will use Hugging Face Inference Providers and bill your Hugging Face credits. Its default is `Qwen/Qwen3-235B-A22B-Instruct-2507`, with `deepseek-ai/DeepSeek-V3-0324` as an automatic server-side fallback if the preferred model is unavailable. `HF_MODEL` and `HF_FALLBACK_MODEL` can override those choices. If no HF token is present, `GEMINI_API_KEY` is also supported as a free-tier fallback. All keys are read server-side only and must never be committed to this repository or pasted into the app UI.
+In the Space **Settings**, add a secret named `HF_TOKEN` with an Hugging Face User Access Token that has inference permission. The Space will use Hugging Face Inference Providers and bill your Hugging Face credits. Its default is `Qwen/Qwen3-235B-A22B-Instruct-2507`, with `deepseek-ai/DeepSeek-V3-0324` as an automatic server-side fallback if the preferred model is unavailable **or returns an invalid schema**. `HF_MODEL` and `HF_FALLBACK_MODEL` can override those choices. If no HF token is present, `GEMINI_API_KEY` is also supported as a free-tier fallback. All keys are read server-side only and must never be committed to this repository or pasted into the app UI.
+
+The public UI applies shared concurrency plus short per-session, shared-window, and runtime model-call budgets before paid inference begins. This keeps the live challenge usable for a judge while preventing the Space from becoming an open model relay; the deterministic safety demonstrations remain available if a budget is reached.
 
 The agent baseline is deterministic and explicitly labelled as such. A configured hosted investigator may choose evidence actions, but it cannot grant itself authority: Faultfix continues to return `allow`, `review`, or `block` according to the deterministic policy.
