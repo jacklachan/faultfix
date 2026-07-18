@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { actionResult, incidentReceipt, nextAction, proofGate } from "./investigation";
 
-describe("Faultline proof engine", () => {
+describe("faultfix proof engine", () => {
   it("does not unlock a fix from plausible but incomplete evidence", () => {
     expect(proofGate(["logs", "trace", "diff", "config"]).complete).toBe(false);
   });

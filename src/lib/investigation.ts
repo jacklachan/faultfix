@@ -31,7 +31,7 @@ export function proofGate(completed: ActionId[]) {
 export function incidentReceipt(completed: ActionId[]) {
   if (!proofGate(completed).complete) return null;
   return {
-    id: "FL-INC-042-R42",
+    id: "FF-INC-042-R42",
     confidence: "High - deterministic reproduction",
     rootCause: "Deploy r42 halved DATABASE_POOL_LIMIT from 40 to 20, exhausting data-service connections in AZ-A and timing out auth and payment requests.",
     rejected: "DNS event: rejected. It affected another zone and no AZ-A routing change was recorded.",

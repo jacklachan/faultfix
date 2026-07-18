@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Faultline — incident investigator",
+  title: "faultfix — incident investigator",
   description: "Evidence-first incident investigation.",
 };
 

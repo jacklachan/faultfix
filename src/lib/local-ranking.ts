@@ -38,7 +38,7 @@ function parseRankedIds(payload: unknown, allowedIds: readonly string[]): string
   }
 }
 
-/** Optional advisory ranking. It never changes Faultline's deterministic proof gate. */
+/** Optional advisory ranking. It never changes faultfix's deterministic proof gate. */
 export async function rankHypothesesWithOllama(hypotheses: Hypothesis[], options: { endpoint?: string; model?: string; fetcher?: FetchLike; timeoutMs?: number; signal?: AbortSignal } = {}): Promise<RankingResult> {
   if (options.signal?.aborted) return fallback(hypotheses, "unavailable", "Local Ollama request was cancelled; deterministic order retained.");
   const fetcher = options.fetcher ?? fetch;
