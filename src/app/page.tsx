@@ -25,6 +25,8 @@ import {
   FIREWALL_DEMO_CUTOFF,
   canSupportPermanentDecision,
   evidenceFirewallReceipt,
+  evaluateContainmentLease,
+  issueContainmentLease,
   screenEvidence,
 } from "@/lib/evidence-firewall";
 import styles from "./page.module.css";
@@ -43,6 +45,7 @@ export default function Home() {
   const [showReplay, setShowReplay] = useState(false);
   const [showAgentLab, setShowAgentLab] = useState(false);
   const [showEvidenceFirewall, setShowEvidenceFirewall] = useState(false);
+  const [firewallEvidenceDrifted, setFirewallEvidenceDrifted] = useState(false);
   const [agentRunStep, setAgentRunStep] = useState(0);
   const [isAgentRunPlaying, setIsAgentRunPlaying] = useState(false);
   const [showGuardrail, setShowGuardrail] = useState(false);
@@ -102,6 +105,22 @@ export default function Home() {
     () => canSupportPermanentDecision(firewallScreen),
     [firewallScreen],
   );
+  const containmentLease = useMemo(
+    () => issueContainmentLease(firewallReceipt.evidenceFingerprint),
+    [firewallReceipt.evidenceFingerprint],
+  );
+  const leaseEvaluation = useMemo(
+    () =>
+      evaluateContainmentLease(containmentLease, {
+        at: "2026-07-18T14:15:00Z",
+        evidenceFingerprint: firewallEvidenceDrifted
+          ? "DRIFT-COUNTERSIGNAL-042"
+          : firewallReceipt.evidenceFingerprint,
+        action: containmentLease.action,
+        resourceScope: containmentLease.resourceScope,
+      }),
+    [containmentLease, firewallEvidenceDrifted, firewallReceipt.evidenceFingerprint],
+  );
   const agentRunActive =
     isAgentRunPlaying && agentRunStep < agentRun.length;
   useEffect(() => {
@@ -115,6 +134,7 @@ export default function Home() {
       setShowReplay(false);
       setShowAgentLab(false);
       setShowEvidenceFirewall(false);
+      setFirewallEvidenceDrifted(false);
       setIsAgentRunPlaying(false);
       setShowGuardrail(false);
       setShowChallenge(false);
@@ -188,6 +208,7 @@ export default function Home() {
     setShowReplay(false);
     setShowAgentLab(false);
     setShowEvidenceFirewall(false);
+    setFirewallEvidenceDrifted(false);
     setIsAgentRunPlaying(false);
     setAgentRunStep(0);
     setShowGuardrail(false);
@@ -721,6 +742,37 @@ export default function Home() {
                 quarantined ticket + future regression <i>→</i> permanent change
                 <i>→</i> <b>blocked from influence</b>
               </p>
+            </section>
+            <section
+              className={`${phase2.leaseCard} ${phase2[`lease${leaseEvaluation.status.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase())}`]}`}
+            >
+              <div>
+                <span>ACTION LEASE / HUMAN-APPROVED CAPABILITY</span>
+                <b>{containmentLease.action}</b>
+              </div>
+              <dl>
+                <div>
+                  <dt>SCOPE</dt>
+                  <dd>{containmentLease.resourceScope}</dd>
+                </div>
+                <div>
+                  <dt>EXPIRES</dt>
+                  <dd>{containmentLease.expiresAt.replace("T", " ").replace("Z", " UTC")}</dd>
+                </div>
+                <div>
+                  <dt>STATE</dt>
+                  <dd>{leaseEvaluation.status.replace(/-/g, " ")}</dd>
+                </div>
+              </dl>
+              <p>{leaseEvaluation.reason}</p>
+              <button
+                className={phase2.leaseButton}
+                onClick={() => setFirewallEvidenceDrifted((value) => !value)}
+              >
+                {firewallEvidenceDrifted
+                  ? "Restore original evidence pack"
+                  : "Simulate conflicting evidence"}
+              </button>
             </section>
             <p className={phase2.noExecution}>
               {permanentEvidence.reason} The causal proof gate is separate and

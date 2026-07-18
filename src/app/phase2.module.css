@@ -348,6 +348,43 @@
 .influenceMap p { margin: 8px 0 0; color: #bfd3ca; font: 11px/1.45 var(--font-geist-mono); }
 .influenceMap i { color: #e9a052; font-style: normal; padding: 0 5px; }
 .influenceMap b { color: #f0cf9c; }
+.leaseCard {
+  margin-top: 12px;
+  border: 1px solid #3c8a72;
+  background: linear-gradient(120deg, #0c2822, #091514);
+  padding: 13px;
+}
+.leaseCard > div > span,
+.leaseCard > div > b { display: block; }
+.leaseCard > div > span {
+  color: #7ae0bd;
+  font: 9px var(--font-geist-mono);
+  letter-spacing: 0.07em;
+}
+.leaseCard > div > b { margin-top: 7px; color: #ecfaf4; font-size: 13px; }
+.leaseCard dl {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+  margin: 13px 0 9px;
+}
+.leaseCard dl div { border: 1px solid #294d44; padding: 8px; }
+.leaseCard dt { color: #7aa99a; font: 9px var(--font-geist-mono); }
+.leaseCard dd { margin: 5px 0 0; color: #d7ebe2; font: 10px/1.35 var(--font-geist-mono); text-transform: uppercase; }
+.leaseCard p { margin: 0; color: #abc6bb; font-size: 11px; line-height: 1.45; }
+.leaseButton {
+  margin-top: 11px;
+  border: 1px solid #588b7c;
+  background: transparent;
+  color: #cbe8dc;
+  padding: 8px 10px;
+  cursor: pointer;
+  font: 10px var(--font-geist-mono);
+}
+.leaseButton:hover { border-color: #f0b56f; color: #ffd49b; }
+.leaseStale { border-color: #d16d5e; background: #20110e; }
+.leaseStale > div > span, .leaseStale dd { color: #fa9a8b; }
+.leaseScopeViolation, .leaseExpired { border-color: #d28a48; background: #21170e; }
 .labBody {
   padding: 25px 5px 8px;
 }
@@ -938,6 +975,7 @@
   .firewallMeta div:last-child { border-bottom: 0; }
   .firewallTrace article { grid-template-columns: 1fr; gap: 7px; }
   .firewallTrace em { justify-self: start; }
+  .leaseCard dl { grid-template-columns: 1fr; }
   .baselineBadge {
     text-align: left;
   }

@@ -50,6 +50,8 @@ Before an agent receives an evidence pack, Faultfix applies a separate **Evidenc
 
 This prevents two common ways an incident demo can become unsafe or misleading: a hostile string in a log/ticket influencing the agent, and a model benefiting from facts that were unavailable at the moment of the decision. The firewall is additive: passing it does not prove causality and cannot unlock a permanent change. Faultfix still requires the independent causal proof gate and human review.
 
+Human review issues a narrow **Action Lease**, not standing agent permission. A lease binds one containment command, its exact resource scope, the reviewed evidence fingerprint, and a short review window. It automatically becomes stale when the evidence pack changes, forcing the agent to pause for re-authorization rather than applying an old approval to a changed incident.
+
 ## Judge demo script (2-3 minutes)
 
 1. Start the investigation and point out that permanent fixes are locked while the proof gate is empty.

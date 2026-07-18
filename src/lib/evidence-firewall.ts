@@ -30,6 +30,19 @@ export type EvidenceFirewallReceipt = {
   excluded: string[];
 };
 
+export type ContainmentLease = {
+  id: "LEASE-INC-042-A";
+  incidentId: "INC-042";
+  action: "drain AZ-A traffic from r42 instances";
+  resourceScope: "AZ-A / r42";
+  evidenceFingerprint: string;
+  issuedAt: string;
+  expiresAt: string;
+  reviewer: "incident-commander";
+};
+
+export type LeaseStatus = "valid" | "stale" | "expired" | "scope-violation";
+
 const INSTRUCTION_PATTERNS = [
   /\bsystem\s*:/i,
   /\bignore\s+(all|previous|prior)\b/i,
@@ -131,6 +144,62 @@ export function evidenceFirewallReceipt(
     excluded: screened
       .filter((artifact) => artifact.disposition !== "admit")
       .map((artifact) => artifact.id),
+  };
+}
+
+/**
+ * A human approval is a narrow, revocable capability—not standing write access.
+ * A new evidence pack, an expired review window, or a scope mismatch requires a
+ * fresh review before containment may proceed.
+ */
+export function issueContainmentLease(
+  evidenceFingerprint: string,
+): ContainmentLease {
+  return {
+    id: "LEASE-INC-042-A",
+    incidentId: "INC-042",
+    action: "drain AZ-A traffic from r42 instances",
+    resourceScope: "AZ-A / r42",
+    evidenceFingerprint,
+    issuedAt: "2026-07-18T14:12:00Z",
+    expiresAt: "2026-07-18T14:22:00Z",
+    reviewer: "incident-commander",
+  };
+}
+
+export function evaluateContainmentLease(
+  lease: ContainmentLease,
+  request: {
+    at: string;
+    evidenceFingerprint: string;
+    action: string;
+    resourceScope: string;
+  },
+): { status: LeaseStatus; reason: string } {
+  if (request.at > lease.expiresAt) {
+    return {
+      status: "expired",
+      reason: "The approval window has expired; the incident commander must review the current record again.",
+    };
+  }
+  if (
+    request.action !== lease.action ||
+    request.resourceScope !== lease.resourceScope
+  ) {
+    return {
+      status: "scope-violation",
+      reason: "The requested action exceeds the reviewer-approved command or resource scope.",
+    };
+  }
+  if (request.evidenceFingerprint !== lease.evidenceFingerprint) {
+    return {
+      status: "stale",
+      reason: "The evidence pack changed after approval; containment is paused pending re-authorization.",
+    };
+  }
+  return {
+    status: "valid",
+    reason: "Scope, evidence fingerprint, and review window all match the approved containment lease.",
   };
 }
 

@@ -4,6 +4,8 @@ import {
   FIREWALL_DEMO_CUTOFF,
   canSupportPermanentDecision,
   evidenceFirewallReceipt,
+  evaluateContainmentLease,
+  issueContainmentLease,
   screenEvidence,
 } from "./evidence-firewall";
 
@@ -31,5 +33,38 @@ describe("evidence firewall", () => {
       screenEvidence(artifact, FIREWALL_DEMO_CUTOFF),
     );
     expect(canSupportPermanentDecision(screened).allowed).toBe(false);
+  });
+
+  it("invalidates an approved containment lease when the evidence pack changes", () => {
+    const receipt = evidenceFirewallReceipt(FIREWALL_DEMO_ARTIFACTS, FIREWALL_DEMO_CUTOFF);
+    const lease = issueContainmentLease(receipt.evidenceFingerprint);
+    expect(
+      evaluateContainmentLease(lease, {
+        at: "2026-07-18T14:15:00Z",
+        evidenceFingerprint: receipt.evidenceFingerprint,
+        action: lease.action,
+        resourceScope: lease.resourceScope,
+      }).status,
+    ).toBe("valid");
+    expect(
+      evaluateContainmentLease(lease, {
+        at: "2026-07-18T14:15:00Z",
+        evidenceFingerprint: "NEW-EVIDENCE-PACK",
+        action: lease.action,
+        resourceScope: lease.resourceScope,
+      }).status,
+    ).toBe("stale");
+  });
+
+  it("does not let a containment approval expand beyond its reviewed scope", () => {
+    const lease = issueContainmentLease("PACK-123");
+    expect(
+      evaluateContainmentLease(lease, {
+        at: "2026-07-18T14:15:00Z",
+        evidenceFingerprint: "PACK-123",
+        action: "restore pool limit globally",
+        resourceScope: "all regions",
+      }).status,
+    ).toBe("scope-violation");
   });
 });
