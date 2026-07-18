@@ -227,7 +227,7 @@ def invoke_hf_completion(client, model, prompt):
             {"role": "user", "content": prompt},
         ],
         temperature=0,
-        max_tokens=360,
+        max_tokens=800,
         response_format={"type": "json_object"},
     )
     return completion.choices[0].message.content
@@ -259,7 +259,7 @@ def invoke_live_model(prompt):
                 "contents": [{"role": "user", "parts": [{"text": prompt}]}],
                 "generationConfig": {
                     "temperature": 0,
-                    "maxOutputTokens": 360,
+                    "maxOutputTokens": 800,
                     "responseMimeType": "application/json",
                 },
             }
@@ -277,7 +277,7 @@ def invoke_live_model(prompt):
                 {
                     "model": model,
                     "temperature": 0,
-                    "max_tokens": 360,
+                    "max_tokens": 800,
                     "response_format": {"type": "json_object"},
                     "messages": [
                         {"role": "system", "content": LIVE_SYSTEM},
