@@ -289,13 +289,13 @@ export default function Home() {
             INCIDENT 042 <i /> PAYMENTS / SEV-1
           </span>
           <h1>
-            Prove the cause.
+            Agents must earn
             <br />
-            <em>Then earn the fix.</em>
+            <em>the right to act.</em>
           </h1>
           <p className={styles.heroCopy}>
-            Stabilize the customer first with a bounded, reversible action.
-            Then prove which explanation can survive the evidence.
+            Faultfix separates a model&apos;s recommendation from the evidence,
+            scope, and approval required to change production.
           </p>
         </div>
         <div className={styles.caseTelemetry}>

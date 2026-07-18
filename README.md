@@ -70,7 +70,7 @@ The terminal-style regression proof is a deterministic visualization of bundled 
 
 Judges can use the public [faultfix ranking Space](https://huggingface.co/spaces/jacklachan/faultfix) without installing Ollama or providing an API key. The proof panel calls its Gradio endpoint only when **Check hosted model** is selected.
 
-The Space runs `google/flan-t5-small` for its zero-key ranking fallback and can use a configured external model for the live investigator and three-pack challenge suite. All model output is advisory only: it never changes the evidence sequence, proof score, containment authority, receipt, or permanent-fix gate. The Space and app both fall back safely if a model response is unusable or unavailable.
+The Space runs `google/flan-t5-small` for its zero-key ranking fallback and can use a configured external model for the live investigator and four-pack challenge suite. It includes capacity, DNS, identity-rotation, and adversarial-evidence packs, plus a deterministic pre-inference hostile-ticket block. All model output is advisory only: it never changes the evidence sequence, proof score, containment authority, receipt, or permanent-fix gate. The Space and app both fall back safely if a model response is unusable or unavailable.
 
 ## Publish the Space
 
