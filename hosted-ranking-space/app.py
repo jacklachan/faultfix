@@ -60,25 +60,42 @@ DEFAULT_HYPOTHESES = [
 DEFAULT_HYPOTHESES_JSON = json.dumps(DEFAULT_HYPOTHESES)
 
 CSS = """
-:root { --ink: #081216; --panel: #0e1b20; --line: #294249; --mint: #67d4b0; --amber: #e6b36a; --fog: #b9cbc4; }
-body { background: var(--ink) !important; }
-.gradio-container { max-width: 1080px !important; background: radial-gradient(circle at 50% -20%, #1a3639 0, transparent 42%), var(--ink) !important; color: var(--fog) !important; font-family: Inter, ui-sans-serif, system-ui, sans-serif !important; }
-#masthead { padding: 36px 6px 22px; border-bottom: 1px solid var(--line); }
-#masthead h1 { color: #f0f6f2; font-size: 42px; letter-spacing: -0.06em; margin: 8px 0; }
-#masthead p { max-width: 580px; color: #91aaa2; line-height: 1.55; }
-.eyebrow { color: var(--amber); font: 700 11px ui-monospace, SFMono-Regular, monospace; letter-spacing: .15em; }
-.signal { border: 1px solid var(--line); background: linear-gradient(145deg, rgba(30, 67, 64, .44), rgba(14, 27, 32, .92)); min-height: 190px; padding: 22px !important; }
-.signal h3 { color: #eef6f1; margin: 12px 0 8px; font-size: 20px; letter-spacing: -.03em; }
-.signal p { color: #9eb5ae; font-size: 14px; line-height: 1.55; }
-.signal .index { color: var(--mint); font: 700 12px ui-monospace, SFMono-Regular, monospace; }
-#run-model button { background: var(--mint) !important; color: #09201d !important; border: 0 !important; border-radius: 2px !important; font-weight: 800 !important; letter-spacing: .02em; min-height: 54px; }
+:root { --void: #070d10; --panel: #0c171b; --panel-2: #102126; --line: #29454b; --mint: #75e0b8; --amber: #ffc36a; --fog: #b9cac4; --muted: #728a83; }
+body { background: var(--void) !important; }
+.gradio-container { max-width: 1120px !important; background: radial-gradient(ellipse at 50% -12%, #1b4040 0, transparent 47%), var(--void) !important; color: var(--fog) !important; font-family: Inter, ui-sans-serif, system-ui, sans-serif !important; padding: 0 18px 30px !important; }
+#masthead { padding: 42px 0 26px; border-bottom: 1px solid var(--line); position: relative; }
+#masthead:after { content: ""; position: absolute; bottom: -1px; left: 0; width: 132px; height: 2px; background: var(--mint); box-shadow: 0 0 18px var(--mint); }
+#masthead h1 { color: #f3faf5; font-size: clamp(38px, 6vw, 66px); line-height: .98; letter-spacing: -.075em; max-width: 780px; margin: 16px 0; }
+#masthead p { max-width: 610px; color: #9fb5ad; line-height: 1.6; font-size: 15px; }
+.topline { display: flex; align-items: center; gap: 12px; color: var(--amber); font: 700 11px ui-monospace, SFMono-Regular, monospace; letter-spacing: .14em; }
+.topline .pulse { width: 8px; height: 8px; border-radius: 99px; background: var(--mint); box-shadow: 0 0 14px var(--mint); }
+.case-chip { display: inline-block; margin-left: auto; color: #90a9a0; border: 1px solid #36545a; padding: 6px 9px; letter-spacing: .08em; }
+.causal-spine { display: flex; align-items: center; gap: 10px; margin: 30px 0 20px; overflow-x: auto; padding-bottom: 4px; }
+.causal-spine .step { flex: 1; min-width: 145px; padding: 13px 14px; background: rgba(15, 30, 34, .74); border: 1px solid #2a464c; }
+.causal-spine b { display: block; color: #e6f0eb; font-size: 13px; margin-top: 5px; }
+.causal-spine small { color: var(--muted); font: 10px ui-monospace, SFMono-Regular, monospace; letter-spacing: .08em; }
+.causal-spine .arrow { color: var(--mint); font-size: 21px; }
+.signal { border: 1px solid var(--line); background: linear-gradient(145deg, rgba(28, 62, 61, .52), rgba(12, 23, 27, .95)); min-height: 230px; padding: 24px !important; position: relative; overflow: hidden; }
+.signal:before { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(135deg, transparent 0 76%, rgba(117,224,184,.07) 76%); }
+.signal.rejected { background: linear-gradient(145deg, rgba(57, 47, 33, .42), rgba(12, 23, 27, .95)); }
+.signal h3 { color: #f0f7f2; margin: 18px 0 9px; font-size: 24px; letter-spacing: -.045em; }
+.signal p { color: #a8bdb5; font-size: 14px; line-height: 1.58; margin: 0; }
+.signal .index { color: var(--mint); font: 700 10px ui-monospace, SFMono-Regular, monospace; letter-spacing: .14em; }
+.signal.rejected .index { color: var(--amber); }
+.signal .tag { position: absolute; right: 16px; top: 15px; color: #8ea69e; font: 10px ui-monospace, SFMono-Regular, monospace; }
+.proof-boundary { margin: 22px 0 10px; display: flex; justify-content: space-between; gap: 20px; padding: 14px 16px; border: 1px dashed #36545a; color: #91a9a1; font-size: 12px; }
+.proof-boundary b { color: var(--amber); font: 700 10px ui-monospace, SFMono-Regular, monospace; letter-spacing: .12em; }
+#run-model button { background: linear-gradient(100deg, #83e7c3, #62cfa8) !important; color: #071512 !important; border: 0 !important; border-radius: 1px !important; font-weight: 900 !important; font-size: 15px !important; letter-spacing: .01em; min-height: 58px; box-shadow: 0 10px 34px rgba(86, 212, 170, .14); transition: transform .2s ease, box-shadow .2s ease; }
+#run-model button:hover { transform: translateY(-2px); box-shadow: 0 14px 44px rgba(86, 212, 170, .24); }
 #verdict { margin-top: 18px; }
-.verdict { border: 1px solid #3a725f; background: linear-gradient(90deg, rgba(28, 75, 62, .55), rgba(14, 27, 32, .92)); padding: 22px; }
-.verdict .stamp { color: var(--mint); font: 700 11px ui-monospace, SFMono-Regular, monospace; letter-spacing: .14em; }
-.verdict h2 { color: #f0f6f2; margin: 8px 0; font-size: 24px; letter-spacing: -.04em; }
-.verdict p { color: #a8c2b9; margin: 0; line-height: 1.55; }
-.verdict .disclaimer { color: var(--amber); margin-top: 14px; font-size: 12px; }
-.footer-note { color: #6f8a82; font-size: 12px; text-align: center; padding: 28px 0 8px; }
+.verdict { border: 1px solid #3d866d; background: linear-gradient(100deg, rgba(27, 80, 64, .72), rgba(12, 26, 29, .95)); padding: 25px; position: relative; }
+.verdict:after { content: "ADVISORY"; position: absolute; right: 20px; top: 19px; color: rgba(117,224,184,.18); font: 800 28px ui-monospace, SFMono-Regular, monospace; letter-spacing: .08em; }
+.verdict .stamp { color: var(--mint); font: 700 10px ui-monospace, SFMono-Regular, monospace; letter-spacing: .15em; }
+.verdict h2 { color: #f4fbf6; margin: 9px 0; font-size: 27px; letter-spacing: -.05em; }
+.verdict p { color: #b6cbc3; margin: 0; line-height: 1.55; max-width: 650px; }
+.verdict .disclaimer { color: var(--amber); margin-top: 15px; font-size: 12px; }
+.footer-note { color: #6f8a82; font-size: 12px; text-align: center; padding: 30px 0 8px; }
+@media (max-width: 700px) { .case-chip { display: none; } .causal-spine .step { min-width: 128px; } .proof-boundary { display: block; } .proof-boundary b { display: block; margin-bottom: 7px; } }
 """
 
 
@@ -87,18 +104,21 @@ def render_verdict():
     top = result["rankedIds"][0] if result["rankedIds"] else "pool-limit"
     title = "Pool-limit change ranks first" if top == "pool-limit" else "DNS event ranks first"
     source = "MODEL RESULT / FLAN-T5-SMALL" if result["source"] == MODEL_ID else "DETERMINISTIC FALLBACK"
-    return f"""<section class='verdict'><div class='stamp'>{source}</div><h2>{title}</h2><p>{result['detail']}</p><p class='disclaimer'>Advisory signal only. The faultfix proof gate remains the authority for any fix.</p></section>"""
+    runner_up = "DNS event" if top == "pool-limit" else "Pool-limit change"
+    return f"""<section class='verdict'><div class='stamp'>{source}</div><h2>{title}</h2><p>{result['detail']} Runner-up: {runner_up}.</p><p class='disclaimer'>ADVISORY ONLY — the model cannot satisfy the proof gate or unlock a fix.</p></section>"""
 
 
 with gr.Blocks(title="faultfix | evidence ranking", css=CSS) as demo:
-    gr.HTML("""<header id='masthead'><div class='eyebrow'>FAULTFIX / SIMULATED INCIDENT / INC-042</div><h1>Which explanation survives the evidence?</h1><p>A compact model-assisted ranking of the two plausible causes. This is a forensic signal, not a verdict.</p></header>""")
+    gr.HTML("""<header id='masthead'><div class='topline'><span class='pulse'></span>FAULTFIX / INCIDENT LAB <span class='case-chip'>SIMULATED / INC-042</span></div><h1>Prove the cause.<br>Then earn the fix.</h1><p>A model-assisted challenge to the two most plausible explanations for a payments outage. The ranking is only a signal; the evidence chain is the authority.</p></header>""")
+    gr.HTML("""<section class='causal-spine'><div class='step'><small>RELEASE</small><b>r42 deployed</b></div><div class='arrow'>→</div><div class='step'><small>CONFIG</small><b>Pool 40 → 20</b></div><div class='arrow'>→</div><div class='step'><small>SERVICE</small><b>AZ-A exhausted</b></div><div class='arrow'>→</div><div class='step'><small>IMPACT</small><b>Payments time out</b></div></section>""")
     with gr.Row():
-        gr.HTML("""<article class='signal'><div class='index'>01 / DEPLOY + CONFIG</div><h3>Pool limit reduced</h3><p>Release <b>r42</b> changed the data-service connection pool from 40 to 20. Connection acquisition then exhausts in AZ-A.</p></article>""")
-        gr.HTML("""<article class='signal'><div class='index'>02 / TEMPORAL OVERLAP</div><h3>DNS event</h3><p>A DNS event occurred around the same time. It is tempting, but it affected another zone and does not explain connection exhaustion.</p></article>""")
-    run_button = gr.Button("Run advisory evidence ranking", variant="primary", elem_id="run-model")
-    verdict = gr.HTML("""<section class='verdict'><div class='stamp'>MODEL READY</div><h2>Awaiting evidence ranking</h2><p>Run the model to rank the two plausible explanations. The deterministic proof gate is intentionally separate.</p></section>""", elem_id="verdict")
+        gr.HTML("""<article class='signal'><div class='index'>HYPOTHESIS 01 / CAUSAL FIT</div><span class='tag'>DIRECT MECHANISM</span><h3>Pool limit reduced</h3><p>Release <b>r42</b> changed the data-service connection pool from 40 to 20. Connection acquisition then exhausts only in AZ-A.</p></article>""")
+        gr.HTML("""<article class='signal rejected'><div class='index'>HYPOTHESIS 02 / TEMPORAL FIT</div><span class='tag'>PLAUSIBLE RED HERRING</span><h3>DNS event</h3><p>An overlapping DNS event looks suspicious. But it affected another zone and cannot explain pool exhaustion or the recovery at limit 40.</p></article>""")
+    gr.HTML("""<div class='proof-boundary'><b>PROOF BOUNDARY</b><span>Model ranking can prioritize a lead. Only the full evidence chain and regression test can unlock the candidate patch.</span></div>""")
+    run_button = gr.Button("Interrogate the evidence with the hosted model", variant="primary", elem_id="run-model")
+    verdict = gr.HTML("""<section class='verdict'><div class='stamp'>MODEL READY / AWAITING SIGNAL</div><h2>Two explanations. One causal chain.</h2><p>Run the model to rank the competing explanations, then return to faultfix to complete the deterministic proof gate.</p><p class='disclaimer'>NO FIX IS AVAILABLE FROM THIS SCREEN.</p></section>""", elem_id="verdict")
     run_button.click(render_verdict, inputs=None, outputs=verdict, show_progress="minimal")
-    gr.HTML("<p class='footer-note'>Powered by a public Hugging Face Space. No production infrastructure is queried.</p>")
+    gr.HTML("<p class='footer-note'>PUBLIC DEMO ENVIRONMENT · MODEL OUTPUT IS ADVISORY · NO PRODUCTION INFRASTRUCTURE IS QUERIED</p>")
 
     # Kept hidden so the faultfix web app can call the documented Gradio API without exposing raw JSON to judges.
     api_input = gr.Textbox(value=DEFAULT_HYPOTHESES_JSON, visible=False)
