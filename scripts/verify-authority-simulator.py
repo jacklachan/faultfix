@@ -191,6 +191,7 @@ def main() -> None:
     rejected, accepted = normalize_live_answer(json.dumps(uncited_supported), evidence_count=4)
     assert not accepted
     assert rejected["claim_status"] == "unsupported"
+    assert "Never return an empty evidence list for a supported claim." in namespace["LIVE_SYSTEM"]
     assert not calls, f"Simulator touched forbidden inference/provider paths: {calls}"
 
     print("PASS: 24/24 deterministic simulator states")
