@@ -31,6 +31,10 @@ The credibility anchors are OWASP’s excessive-agency guidance and DeepMind’s
 4. **Walk the INC-042 proof path (45 seconds).** Show the bounded reversible containment first. Then complete the evidence chain and regression. Emphasize that containment did not become a causal verdict or permanent fix.
 5. **Close (10 seconds).** “The product is not another incident chatbot. It is an authority layer for whatever agent a team chooses.”
 
+## Authority Simulator moment
+
+After the hostile-ticket block, take 15 seconds to make the policy visible: set the requested action to `permanent` while causal proof is `incomplete` and it stays `BLOCK`; switch only proof to `reproduced` and it reaches `REVIEW`, never automatic execution. Point to `model calls: 0` and the receipt fingerprint. It is a deterministic control surface, so it does not consume Hugging Face credit.
+
 ## Hostile judge answers
 
 **Public-source evidence?**

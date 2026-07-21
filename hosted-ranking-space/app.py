@@ -488,6 +488,146 @@ def policy_authority(requested_action, has_release_evidence):
     return "BLOCK", "Permanent changes remain blocked until the deterministic causal proof gate and reproduction are complete."
 
 
+AUTHORITY_SIMULATOR_POLICY = "faultfix-authority-simulator/v1"
+AUTHORITY_SIMULATOR_DEFAULTS = {
+    "evidence_trust": "trusted",
+    "replay_status": "within-cutoff",
+    "requested_action": "contain",
+    "proof_state": "incomplete",
+}
+AUTHORITY_SIMULATOR_ALLOWED = {
+    "evidence_trust": {"trusted", "untrusted"},
+    "replay_status": {"within-cutoff", "post-cutoff"},
+    "requested_action": {"observe", "contain", "permanent"},
+    "proof_state": {"incomplete", "reproduced"},
+}
+
+
+def normalize_simulator_choice(value, field):
+    """Accept only the simulator's fixed policy enums and fail closed otherwise."""
+    if isinstance(value, str) and value in AUTHORITY_SIMULATOR_ALLOWED[field]:
+        return value
+    # The UI only offers fixed values, but the public app must also fail closed
+    # if a malformed browser or API request reaches this function.
+    return {
+        "evidence_trust": "untrusted",
+        "replay_status": "post-cutoff",
+        "requested_action": "permanent",
+        "proof_state": "incomplete",
+    }[field]
+
+
+def evaluate_authority_simulator(evidence_trust, replay_status, requested_action, proof_state):
+    """Evaluate a bounded policy scenario without consulting a model or provider."""
+    trust = normalize_simulator_choice(evidence_trust, "evidence_trust")
+    replay = normalize_simulator_choice(replay_status, "replay_status")
+    action = normalize_simulator_choice(requested_action, "requested_action")
+    proof = normalize_simulator_choice(proof_state, "proof_state")
+
+    # Replay status wins, matching the Evidence Firewall: hindsight never gains
+    # influence merely because it comes from a trusted source.
+    if replay == "post-cutoff":
+        disposition = "future"
+        evidence_label = "EXCLUDE"
+        model_reach = "none"
+        model_context = "0 bytes / post-cutoff evidence excluded"
+        authority = "BLOCK"
+        reason = "The observation falls outside the replay boundary, so it cannot influence this decision."
+        next_step = "Use a trustworthy observation captured before the replay cutoff."
+        lease = "Not issued"
+    elif trust == "untrusted":
+        disposition = "quarantine"
+        evidence_label = "QUARANTINE"
+        model_reach = "none"
+        model_context = "0 bytes / untrusted content quarantined"
+        authority = "BLOCK"
+        reason = "Untrusted content cannot become model context or action authority."
+        next_step = "Replace it with a first-party, scope-bound fact before evaluating an action."
+        lease = "Not issued"
+    else:
+        disposition = "admit"
+        evidence_label = "ADMIT"
+        model_reach = "admitted"
+        model_context = "1 normalized, scope-bound fact"
+        if action == "observe":
+            authority = "ALLOW"
+            reason = "Read-only investigation is within the admitted evidence boundary."
+            next_step = "Collect the next trustworthy fact without changing production state."
+            lease = "Not required"
+        elif action == "contain":
+            authority = "REVIEW"
+            reason = "Containment is reversible and in scope, but an incident commander must approve the lease."
+            next_step = "Request a narrow, time-bounded containment lease bound to this receipt."
+            lease = "Pending human approval"
+        elif proof == "reproduced":
+            authority = "REVIEW"
+            reason = "Causal proof is reproduced, but a permanent change still needs human approval and staged rollout."
+            next_step = "Prepare the smallest staged change packet for human review."
+            lease = "Pending human approval"
+        else:
+            authority = "BLOCK"
+            reason = "A permanent change cannot proceed until causal proof is independently reproduced."
+            next_step = "Reproduce the causal mechanism before proposing a permanent change."
+            lease = "Not issued"
+
+    receipt_input = {
+        "action": action,
+        "disposition": disposition,
+        "policy": AUTHORITY_SIMULATOR_POLICY,
+        "proof": proof,
+        "replay": replay,
+        "trust": trust,
+    }
+    fingerprint = hashlib.sha256(
+        json.dumps(receipt_input, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()[:12].upper()
+    return {
+        "authority": authority,
+        "disposition": disposition,
+        "evidence_label": evidence_label,
+        "lease": lease,
+        "model_context": model_context,
+        "model_reach": model_reach,
+        "next_step": next_step,
+        "policy": AUTHORITY_SIMULATOR_POLICY,
+        "proof": proof,
+        "reason": reason,
+        "receipt_fingerprint": fingerprint,
+        "requested_action": action,
+        "replay": replay,
+        "trust": trust,
+    }
+
+
+def render_authority_simulator(evidence_trust, replay_status, requested_action, proof_state):
+    """Render a judge-readable receipt for the deterministic authority simulator."""
+    result = evaluate_authority_simulator(
+        evidence_trust,
+        replay_status,
+        requested_action,
+        proof_state,
+    )
+    authority_class = result["authority"].lower()
+    return f"""<section class='authority-simulator-result {authority_class}' role='status' aria-live='polite' data-authority='{result['authority']}' data-evidence-disposition='{result['disposition']}' data-model-reach='{result['model_reach']}' data-model-calls='0' data-receipt-fingerprint='{result['receipt_fingerprint']}'><div class='simulator-receipt-head'><div><span>DECISION RECEIPT / FAULTFIX POLICY V1</span><h3>Policy, not the model, decides.</h3></div><code>RECEIPT {result['receipt_fingerprint']}</code></div><div class='simulator-receipt-grid'><div class='simulator-cell {result['disposition']}'><span>EVIDENCE GATE</span><b>{result['evidence_label']}</b><small>{result['model_context']}</small></div><div class='simulator-cell'><span>REQUESTED ACTION</span><b>{html.escape(result['requested_action'])}</b><small>proof: {html.escape(result['proof'])}</small></div><div class='simulator-cell authority {authority_class}'><span>FAULTFIX AUTHORITY</span><b>{result['authority']}</b><small>model calls: 0</small></div></div><div class='simulator-explanation'><div><span>WHY THIS RESULT</span><p>{html.escape(result['reason'])}</p></div><div><span>NEXT BOUNDARY</span><p>{html.escape(result['next_step'])}</p></div></div><div class='simulator-footer'><span>ACTION LEASE / {html.escape(result['lease'].upper())}</span><span>{html.escape(result['policy'])}</span></div></section>"""
+
+
+def reset_authority_simulator():
+    """Return the review-gated default without touching any inference path."""
+    defaults = AUTHORITY_SIMULATOR_DEFAULTS
+    return (
+        defaults["evidence_trust"],
+        defaults["replay_status"],
+        defaults["requested_action"],
+        defaults["proof_state"],
+        render_authority_simulator(
+            defaults["evidence_trust"],
+            defaults["replay_status"],
+            defaults["requested_action"],
+            defaults["proof_state"],
+        ),
+    )
+
+
 def case_prompt(case):
     evidence = "\n".join(f"E{index + 1}. {fact}" for index, fact in enumerate(case["evidence"]))
     return f"""Incident pack: {case['id']}
@@ -614,7 +754,7 @@ body { background:var(--void)!important; }
 .matrix-row b { font-size:10px; }
 .matrix-note { font-size:13px; }
 
-.demo-path { display:grid; grid-template-columns:repeat(3,1fr); margin:28px 0 22px; border:1px solid var(--rule); background:rgba(7,19,21,.84); }
+.demo-path { display:grid; grid-template-columns:repeat(4,1fr); margin:28px 0 22px; border:1px solid var(--rule); background:rgba(7,19,21,.84); }
 .demo-path-step { position:relative; min-height:132px; padding:18px 20px 19px 76px; border-right:1px solid var(--rule); }
 .demo-path-step:last-child { border-right:0; }
 .demo-path-step span { position:absolute; top:20px; left:20px; color:var(--amber); font-size:12px; font-weight:800; letter-spacing:.1em; }
@@ -623,6 +763,7 @@ body { background:var(--void)!important; }
 .demo-path-step:before { content:''; position:absolute; left:20px; top:52px; width:35px; height:1px; background:var(--mint); box-shadow:0 0 12px var(--mint); }
 .demo-path-step:nth-child(2):before { background:var(--amber); box-shadow:0 0 12px var(--amber); }
 .demo-path-step:nth-child(3):before { background:var(--coral); box-shadow:0 0 12px var(--coral); }
+.demo-path-step:nth-child(4):before { background:#72bfe1; box-shadow:0 0 12px #72bfe1; }
 
 .section-heading { display:flex; align-items:end; justify-content:space-between; gap:20px; margin:38px 0 13px; padding-bottom:12px; border-bottom:1px solid rgba(80,125,119,.72); }
 .section-heading .section-title { margin:0; color:var(--text); font-size:26px; line-height:1; letter-spacing:-.055em; }
@@ -707,6 +848,44 @@ CSS += """
 }
 """
 
+CSS += """
+/* Deterministic Authority Simulator: deliberately separate from live inference. */
+#authority-simulator { margin:16px 0 6px; border:1px solid #4a8674; border-radius:8px; background:linear-gradient(128deg,rgba(18,66,55,.56),rgba(7,17,19,.96)); box-shadow:0 20px 54px rgba(0,0,0,.16); overflow:hidden; }
+#authority-simulator .form { border:0!important; background:transparent!important; }
+#authority-simulator .block { border-color:#315d52!important; background:rgba(7,25,25,.52)!important; }
+#authority-simulator .label-wrap > span,#authority-simulator label { color:#c7e0d6!important; font:700 10px 'DM Mono','SFMono-Regular',Consolas,monospace!important; letter-spacing:.075em; text-transform:uppercase; }
+#authority-simulator .secondary-wrap { color:#8fac9f!important; font-size:11px!important; }
+#authority-simulator [role='radiogroup'] { gap:8px!important; }
+#authority-simulator [role='radio'] { min-height:39px; border-color:#3b675d!important; background:rgba(8,23,24,.86)!important; color:#c9dfd4!important; }
+#authority-simulator [role='radio'][aria-checked='true'] { border-color:#79dfba!important; background:rgba(36,109,84,.34)!important; color:#f0fff7!important; box-shadow:inset 2px 0 #79dfba; }
+#simulator-evaluate,#simulator-evaluate button { border:1px solid #84e7c3!important; background:linear-gradient(104deg,#a9f2d3,#68d1ae)!important; color:#062119!important; box-shadow:0 14px 30px rgba(96,218,175,.18)!important; }
+#simulator-reset,#simulator-reset button { border:1px solid #466c67!important; background:rgba(15,36,38,.95)!important; color:#d2e8de!important; box-shadow:none!important; }
+#simulator-result { scroll-margin-top:22px; }
+.authority-simulator-result { margin:0 0 24px; border:1px solid #3a7867; background:linear-gradient(120deg,rgba(14,53,46,.94),rgba(6,16,18,.98)); box-shadow:0 24px 68px rgba(0,0,0,.2); padding:20px; }
+.simulator-receipt-head { display:flex; justify-content:space-between; gap:18px; align-items:start; padding-bottom:15px; border-bottom:1px solid #315b50; }
+.simulator-receipt-head span,.simulator-cell span,.simulator-explanation span,.simulator-footer { color:#82daba; font:800 10px 'DM Mono','SFMono-Regular',Consolas,monospace; letter-spacing:.09em; }
+.simulator-receipt-head h3 { margin:7px 0 0; color:#effaf4; font-size:25px; letter-spacing:-.055em; }
+.simulator-receipt-head code { border:1px solid #456d61; padding:7px; color:#a7d8c5; font:10px 'DM Mono','SFMono-Regular',Consolas,monospace; white-space:nowrap; }
+.simulator-receipt-grid { display:grid; grid-template-columns:1fr 1fr 1.15fr; margin-top:14px; border:1px solid #315b50; background:#081616; }
+.simulator-cell { min-height:104px; padding:13px; border-right:1px solid #315b50; }
+.simulator-cell:last-child { border-right:0; }
+.simulator-cell b,.simulator-cell small { display:block; }
+.simulator-cell b { margin:11px 0 7px; color:#e8f8f0; font-size:15px; text-transform:uppercase; }
+.simulator-cell small { color:#aac5ba; font-size:11px; line-height:1.4; }
+.simulator-cell.authority { box-shadow:inset 3px 0 var(--amber); }
+.simulator-cell.authority.allow { box-shadow:inset 3px 0 var(--mint); }
+.simulator-cell.authority.block,.simulator-cell.quarantine { background:#21120f; box-shadow:inset 3px 0 var(--coral); }
+.simulator-cell.future { background:#21190d; box-shadow:inset 3px 0 var(--amber); }
+.simulator-cell.authority.review b,.simulator-cell.future b { color:#ffd18f; }
+.simulator-cell.authority.block b,.simulator-cell.quarantine b { color:#ffab9e; }
+.simulator-explanation { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px; }
+.simulator-explanation > div { border:1px solid #294940; padding:12px; }
+.simulator-explanation p { margin:7px 0 0; color:#cbded5; font-size:12px; line-height:1.5; }
+.simulator-footer { display:flex; justify-content:space-between; gap:15px; margin-top:14px; border-left:2px solid var(--amber); background:#21170e; padding:10px 12px; color:#f1d2a7; font-size:10px; line-height:1.45; }
+@media (prefers-reduced-motion:no-preference) { #simulator-evaluate:hover,#simulator-evaluate button:hover { box-shadow:0 20px 40px rgba(96,218,175,.3)!important; } #simulator-reset:hover,#simulator-reset button:hover { border-color:#9adbc4!important; color:#f2fff8!important; } }
+@media (max-width:720px) { .simulator-receipt-head,.simulator-footer { display:block; }.simulator-receipt-head code { display:inline-block; margin-top:12px; }.simulator-receipt-grid,.simulator-explanation { grid-template-columns:1fr; }.simulator-cell { border-right:0; border-bottom:1px solid #315b50; }.simulator-cell:last-child { border-bottom:0; }.simulator-footer span { display:block; }.simulator-footer span + span { margin-top:6px; } }
+"""
+
 def render_verdict():
     result = rank_hypotheses(DEFAULT_HYPOTHESES_JSON)
     top = result["rankedIds"][0] if result["rankedIds"] else "pool-limit"
@@ -765,13 +944,53 @@ warm_ranker()
 
 with gr.Blocks(title="faultfix | agent authority lab", css=CSS, head=HEAD) as demo:
     gr.HTML("""<header id='masthead'><div><div class='kicker'><span class='pulse'></span>FAULTFIX / AGENT AUTHORITY</div><h1>AI agents must<br><span class='emphasis'>earn the right to act.</span></h1><p class='subtitle'>Faultfix sits beneath any investigator and decides what evidence may influence it, which action is in scope, and whether that action can happen.</p></div><aside class='matrix'><div class='matrix-head'><span>AUTHORITY CONTRACT</span><span>DEMO SAFE</span></div><div class='matrix-row'><span>Read trusted evidence</span><b class='allow'>ALLOW</b></div><div class='matrix-row'><span>Contain a scoped impact</span><b class='review'>REVIEW</b></div><div class='matrix-row'><span>Make a permanent change</span><b class='block'>BLOCKED</b></div><p class='matrix-note'>The model can recommend. Faultfix is the authority.</p></aside></header>""")
-    gr.HTML("""<section class='demo-path' aria-labelledby='demo-path-title'><article class='demo-path-step'><span>01</span><b id='demo-path-title'>Block the unsafe command</b><p>Show the hostile ticket quarantined before an agent receives it.</p></article><article class='demo-path-step'><span>02</span><b>Trace the proof boundary</b><p>Separate reversible containment from a causal verdict.</p></article><article class='demo-path-step'><span>03</span><b>Stress-test an adviser</b><p>Run sanitized packs. The model suggests; the policy governs.</p></article></section>""")
+    gr.HTML("""<section class='demo-path' aria-labelledby='demo-path-title'><article class='demo-path-step'><span>01</span><b id='demo-path-title'>Block the unsafe command</b><p>Show the hostile ticket quarantined before an agent receives it.</p></article><article class='demo-path-step'><span>02</span><b>Simulate authority</b><p>Change the facts and watch policy, not a model, decide.</p></article><article class='demo-path-step'><span>03</span><b>Trace the proof boundary</b><p>Separate reversible containment from a causal verdict.</p></article><article class='demo-path-step'><span>04</span><b>Stress-test an adviser</b><p>Run sanitized packs. The model suggests; the policy governs.</p></article></section>""")
     gr.HTML("""<section class='section-heading'><div><span class='section-number'>01 / PROVE THE CONTROL</span><h2 class='section-title'>Start with the failure Faultfix prevents.</h2></div><p>Use the deterministic safety controls first. They require no API key and make the authority boundary visible in seconds.</p></section>""")
     with gr.Row(equal_height=True):
         attack_button = gr.Button("Block a hostile production command", elem_id="firewall-challenge")
         lab_button = gr.Button("Run the authority trace", elem_id="agent-lab")
     attack_output = gr.HTML("<section class='result-placeholder' role='status' aria-live='polite'><b>READY / ATTACK TRACE</b><br>Show what the agent is never allowed to see or do.</section>", elem_id="attack-result")
     lab_output = gr.HTML("<section class='result-placeholder' role='status' aria-live='polite'><b>READY / AUTHORITY TRACE</b><br>Run the deterministic policy baseline to inspect allow, review, and block decisions.</section>", elem_id="lab-result")
+    gr.HTML("""<section class='section-heading'><div><span class='section-number'>01B / SIMULATE AUTHORITY</span><h2 class='section-title'>See policy make the decision.</h2></div><p>All inputs are simulated policy attributes. This receipt is deterministic: no model call, no provider call, and no Hugging Face credit.</p></section>""")
+    with gr.Group(elem_id="authority-simulator"):
+        gr.HTML("<p class='action-note'><b>CONTROL SURFACE</b> / CHANGE EVIDENCE TRUST, REPLAY TIMING, ACTION SCOPE, AND CAUSAL PROOF. THE POLICY FAILS CLOSED.</p>")
+        with gr.Row(equal_height=True):
+            simulator_trust = gr.Radio(
+                choices=[("Trusted and scope-bound", "trusted"), ("Untrusted external content", "untrusted")],
+                value=AUTHORITY_SIMULATOR_DEFAULTS["evidence_trust"],
+                label="Evidence source",
+                info="Only trusted, bounded facts may influence a decision.",
+            )
+            simulator_replay = gr.Radio(
+                choices=[("Observed before cutoff", "within-cutoff"), ("Observed after cutoff", "post-cutoff")],
+                value=AUTHORITY_SIMULATOR_DEFAULTS["replay_status"],
+                label="Replay window",
+                info="Post-cutoff facts cannot use hindsight to influence the case.",
+            )
+        with gr.Row(equal_height=True):
+            simulator_action = gr.Radio(
+                choices=[("Observe only", "observe"), ("Contain a scoped impact", "contain"), ("Make a permanent change", "permanent")],
+                value=AUTHORITY_SIMULATOR_DEFAULTS["requested_action"],
+                label="Requested action",
+            )
+            simulator_proof = gr.Radio(
+                choices=[("Incomplete", "incomplete"), ("Reproduced", "reproduced")],
+                value=AUTHORITY_SIMULATOR_DEFAULTS["proof_state"],
+                label="Causal proof",
+                info="Reproduction can earn human review, never automatic write authority.",
+            )
+        with gr.Row(equal_height=True):
+            simulator_button = gr.Button("Evaluate authority", elem_id="simulator-evaluate", scale=2)
+            simulator_reset = gr.Button("Reset to review scenario", elem_id="simulator-reset", scale=1)
+    simulator_output = gr.HTML(
+        render_authority_simulator(
+            AUTHORITY_SIMULATOR_DEFAULTS["evidence_trust"],
+            AUTHORITY_SIMULATOR_DEFAULTS["replay_status"],
+            AUTHORITY_SIMULATOR_DEFAULTS["requested_action"],
+            AUTHORITY_SIMULATOR_DEFAULTS["proof_state"],
+        ),
+        elem_id="simulator-result",
+    )
     gr.HTML("""<section class='section-heading'><div><span class='section-number'>02 / INSPECT THE EVIDENCE</span><h2 class='section-title'>A plausible answer is not proof.</h2></div><p>Compare a direct causal mechanism with a tempting red herring, then inspect provenance and replay boundaries.</p></section>""")
     gr.HTML("""<section class='scenario-strip'><article><b>INC-042 / CAPACITY</b><span>r42 reduces a connection pool. A model investigates; the causal proof still decides.</span></article><article><b>INC-103 / IDENTITY</b><span>A credential rotation breaks token exchange. Reversible rollback may be reviewed, never assumed.</span></article><article><b>ATTACK-001 / UNTRUSTED</b><span>A hostile ticket requests a global write. It is quarantined before model inference.</span></article></section>""")
     gr.HTML("""<section class='spine'><div class='step'><small>RELEASE</small><b>r42 deployed</b></div><i aria-hidden='true'>&rarr;</i><div class='step'><small>CONFIG</small><b>Pool 40 to 20</b></div><i aria-hidden='true'>&rarr;</i><div class='step'><small>SERVICE</small><b>AZ-A exhausted</b></div><i aria-hidden='true'>&rarr;</i><div class='step'><small>IMPACT</small><b>Payments time out</b></div></section>""")
@@ -806,6 +1025,21 @@ with gr.Blocks(title="faultfix | agent authority lab", css=CSS, head=HEAD) as de
     suite_button = gr.Button("Run four-pack challenge suite / up to 25 seconds", elem_id="challenge-suite")
     live_output = gr.HTML("<section class='result-placeholder' role='status' aria-live='polite'><b>LIVE INVESTIGATOR / READY</b><br>Choose one pack for a focused run, or stress-test all four packs in parallel.</section>", elem_id="live-result")
     lab_button.click(render_agent_lab, inputs=None, outputs=lab_output, show_progress="minimal", scroll_to_output=True)
+    simulator_button.click(
+        render_authority_simulator,
+        inputs=[simulator_trust, simulator_replay, simulator_action, simulator_proof],
+        outputs=simulator_output,
+        show_progress="hidden",
+        scroll_to_output=True,
+        api_name=False,
+    )
+    simulator_reset.click(
+        reset_authority_simulator,
+        inputs=None,
+        outputs=[simulator_trust, simulator_replay, simulator_action, simulator_proof, simulator_output],
+        show_progress="hidden",
+        api_name=False,
+    )
     run_button.click(render_verdict, inputs=None, outputs=verdict, show_progress="minimal", scroll_to_output=True)
     public_pack_button.click(render_public_evidence_pack, inputs=public_pack_selector, outputs=public_pack_output, show_progress="minimal", scroll_to_output=True)
     public_pack_selector.change(render_public_evidence_pack, inputs=public_pack_selector, outputs=public_pack_output, show_progress="hidden", api_name=False)

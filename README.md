@@ -50,6 +50,7 @@ The graphic above and the diagram are the same contract: raw, untrusted content 
 | Demo moment | What judges see | Why it matters |
 | --- | --- | --- |
 | **Hostile ticket** | A global production command is `BLOCK`ed and **0** raw ticket bytes reach model context | Prompt injection is stopped before inference, not “handled” by asking the model nicely |
+| **Authority Simulator** | A judge can change trust, replay time, action scope, and proof state to produce a fingerprinted `ALLOW` / `REVIEW` / `BLOCK` receipt | The policy boundary is inspectable without an API key, a provider call, or any Hugging Face credit |
 | **INC-042** | A reversible containment route before causal proof is complete | Containment is not a root-cause verdict |
 | **Four-pack challenge** | Capacity, DNS, identity rotation, and insufficient-evidence packs | The model advises across different cases; the authority policy stays the same |
 | **Public case library** | Google Cloud and Cloudflare postmortems become provenance-tagged evidence | The product can work with real public evidence without pretending it has live production telemetry |
@@ -97,6 +98,7 @@ Before causal proof is complete, Faultfix can offer a separate, simulated contai
 | --- | --- |
 | `INC-042`, causal graph, regression, containment packet, and prevention guardrail | Deterministic fixture bundled with the app; no production system is queried |
 | Evidence Firewall and Action Lease | Real policy mechanics shown through a deterministic security demo; the lease is simulated, scoped, time-bounded, and evidence-bound |
+| Authority Simulator | A deterministic, fixed-enum policy evaluator. It makes zero model or provider calls and emits only a receipt derived from the selected policy attributes |
 | Google Cloud GCE and Cloudflare incident packs | Structured from official public postmortems; they are read-only public evidence, not private raw telemetry or independent re-investigations |
 | Hosted Space ranking | Runs keylessly with a small model plus deterministic fallback |
 | Hosted live investigator | Optional. It requires a deployer-configured provider secret; its responses are validated and advisory only |
@@ -118,6 +120,7 @@ Then open the local URL printed by Next.js. Validate the build with:
 
 ```bash
 npm test
+npm run test:space
 npm run lint
 npm run build
 ```
@@ -148,6 +151,8 @@ Faultfix is aligned with the direction of Google DeepMind’s CaMeL research: ke
 The public [Faultfix Space](https://huggingface.co/spaces/jacklachan/faultfix) exposes deterministic safety and ranking demonstrations without visitor keys. Its optional live investigator is Hugging Face-only: it uses a server-side `HF_TOKEN` with Hugging Face Inference Providers.
 
 Every live response is schema-validated; malformed output is safely rejected. The model can select an advisory next step from sanitized evidence, while Faultfix independently returns `ALLOW`, `REVIEW`, or `BLOCK`.
+
+The Space also includes an Authority Simulator that evaluates fixed trust, replay, action, and proof attributes locally in the policy layer. It never reserves a live-model budget or invokes Hugging Face Inference Providers.
 
 </details>
 
