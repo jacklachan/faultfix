@@ -125,6 +125,18 @@ npm run lint
 npm run build
 ```
 
+## Judge and tester quickstart
+
+You can test Faultfix without rebuilding it or supplying an API key:
+
+1. Open the public [Faultfix Space](https://huggingface.co/spaces/jacklachan/faultfix).
+2. Run **Block a hostile production command** to see untrusted ticket content quarantined before model inference.
+3. In **Authority Simulator**, select a permanent action with incomplete proof, then reproduced proof. The policy moves from `BLOCK` to `REVIEW`; it never auto-executes and always reports `model calls: 0`.
+4. Open a public incident pack to inspect bounded, source-linked Google Cloud or Cloudflare evidence.
+5. Optionally run the hosted investigator. It uses the Space owner's Hugging Face provider configuration, validates every response, and remains advisory. If the provider is unavailable, the deterministic controls still work and the UI says so rather than fabricating an answer.
+
+All sample incidents and the deterministic evidence fixture are bundled with the repository; no separate dataset download or test account is required. The public postmortem packs link to their original sources and are intentionally read-only.
+
 ---
 
 ## Why this product exists
@@ -184,6 +196,8 @@ The script refuses uncommitted or unexpected Space files, uploads only an explic
 
 Faultfix is new Build Week product work. The team previously placed **14th** in the Meta x PyTorch reinforcement-learning hackathon with [PostmortemEnv / Three Musketeers](https://github.com/Auenchanters/Three-Musketeers-FINALS). That project is lineage only; Faultfix is a separate developer-facing evidence and proof-gating workflow.
 
-## Development note
+## How we used Codex and GPT-5.6
 
-Codex/GPT-5.6 assisted with the deterministic evidence model, interface, and test coverage. It is not required at runtime; Faultfix’s deterministic proof engine is the source of truth.
+Faultfix was developed with Codex using GPT-5.6 as a hands-on engineering collaborator throughout the build. It helped turn the authority-layer threat model into the deterministic evidence and policy model, implement and refine the Next.js and Hugging Face interfaces, add the Authority Simulator and public incident packs, and build the unit, integration, and deployment checks used to verify the demo.
+
+Codex/GPT-5.6 is a development tool, not a hidden runtime dependency. Faultfix does not require an OpenAI API key or a GPT call to run: its proof gates and authority decisions are deterministic, while its optional hosted investigator uses Hugging Face Inference Providers and can only give schema-validated advice.
