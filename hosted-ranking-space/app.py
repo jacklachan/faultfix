@@ -889,6 +889,58 @@ CSS += """
 @media (max-width:720px) { .simulator-receipt-head,.simulator-footer { display:block; }.simulator-receipt-head code { display:inline-block; margin-top:12px; }.simulator-receipt-grid,.simulator-explanation { grid-template-columns:1fr; }.simulator-cell { border-right:0; border-bottom:1px solid #315b50; }.simulator-cell:last-child { border-bottom:0; }.simulator-footer span { display:block; }.simulator-footer span + span { margin-top:6px; } }
 """
 
+# This is a judge-facing control surface. Preserve the dark incident-lab mood,
+# but make every input and explanatory line readable at a glance.
+CSS += """
+/* Legibility pass: solid input surfaces and high-contrast Gradio form copy. */
+.gradio-container {
+  --body-text-color:#edf9f3;
+  --body-text-color-subdued:#c9ded5;
+  --block-label-text-color:#eaf9f2;
+  --block-info-text-color:#c9e0d6;
+  --input-background-fill:#0d2423;
+  --input-border-color:#5c9584;
+  --input-placeholder-color:#c5dcd2;
+  --background-fill-primary:#0b1a1b;
+  --background-fill-secondary:#0e2926;
+  --button-secondary-text-color:#edf9f3;
+  --checkbox-label-background-fill:#102a2b;
+  --checkbox-label-background-fill-selected:#185a49;
+  --checkbox-label-border-color:#5f9a8a;
+  --checkbox-label-border-color-selected:#9bf0ce;
+  --checkbox-label-text-color:#e7f6ef;
+  --checkbox-label-text-color-selected:#f4fff9;
+}
+.section-heading p,.demo-path-step p,.action-note,.result-placeholder,.footer-note { color:#cfe4db!important; }
+.section-heading p,.demo-path-step p { font-size:13px!important; line-height:1.55!important; }
+.action-note,.result-placeholder { font-size:12px!important; line-height:1.55!important; }
+.gradio-container .label-wrap > span,.gradio-container label { color:#edf9f3!important; font-weight:700!important; }
+.gradio-container .secondary-wrap,.gradio-container .secondary-wrap * { color:#cbe2d8!important; font-size:12px!important; line-height:1.45!important; opacity:1!important; }
+.gradio-container input,.gradio-container textarea,.gradio-container [role='combobox'] { color:#f1fff8!important; background:#0d2423!important; border-color:#5c9584!important; }
+
+#authority-simulator { --body-text-color:#f2fff8; --body-text-color-subdued:#c4d9d0; --block-label-text-color:#e7f6ef; --block-info-text-color:#c4d9d0; --input-background-fill:#102a2b; --input-border-color:#5f9a8a; --input-border-color-focus:#ffd27a; --checkbox-label-background-fill:#102a2b; --checkbox-label-background-fill-selected:#185a49; --checkbox-label-border-color:#5f9a8a; --checkbox-label-border-color-selected:#9bf0ce; --checkbox-label-text-color:#e7f6ef; --checkbox-label-text-color-selected:#f4fff9; border-color:#6dad99!important; background:#0c2422!important; box-shadow:0 24px 56px rgba(0,0,0,.28)!important; }
+#authority-simulator .block { border-color:#4f8878!important; background:#102d2a!important; }
+#authority-simulator .label-wrap > span,#authority-simulator label { color:#f0fff8!important; font-size:12px!important; letter-spacing:.06em!important; }
+#authority-simulator .secondary-wrap,#authority-simulator .secondary-wrap * { color:#d0e8dd!important; font-size:12px!important; }
+#authority-simulator .wrap label { min-height:44px!important; border-color:#5b9584!important; background:#0c211f!important; color:#f0fff8!important; font-size:13px!important; font-weight:650!important; }
+#authority-simulator .wrap label,#authority-simulator .wrap label span,#authority-simulator label * { color:inherit!important; opacity:1!important; }
+#authority-simulator .wrap label.selected,#authority-simulator .wrap label:has(input:checked) { border-color:#9df0cc!important; background:#185a49!important; color:#ffffff!important; box-shadow:inset 3px 0 #9df0cc!important; }
+#authority-simulator .wrap label:hover { border-color:#9df0cc!important; background:#143c35!important; }
+#authority-simulator .wrap input[type='radio'] { accent-color:#9df0cc!important; }
+.authority-simulator-result { border-color:#5b9d89!important; background:#0a211f!important; }
+.simulator-receipt-head span,.simulator-cell span,.simulator-explanation span,.simulator-footer { color:#9de9c8!important; font-size:11px!important; }
+.simulator-receipt-head code { color:#d8f5e8!important; border-color:#5f9d8a!important; }
+.simulator-receipt-grid { border-color:#4f8878!important; background:#0b201e!important; }
+.simulator-cell { border-color:#4f8878!important; }
+.simulator-cell b { color:#f2fff9!important; font-size:16px!important; }
+.simulator-cell small,.simulator-explanation p { color:#d3e9df!important; font-size:13px!important; }
+.simulator-explanation > div { border-color:#477d70!important; background:#0d2926!important; }
+.simulator-footer { background:#2a1d0d!important; color:#ffe0b8!important; font-size:11px!important; }
+
+.live-run > p,.live-rationale p,.public-pack .summary,.public-pack .artifact p,.firewall .summary,.firewall .artifact p,.firewall .lease p,.agent-lab .intro,.event p,.event small { color:#d3e8df!important; }
+.live-run > p,.public-pack .summary,.firewall .summary,.agent-lab .intro { font-size:14px!important; }
+"""
+
 def render_verdict():
     result = rank_hypotheses(DEFAULT_HYPOTHESES_JSON)
     top = result["rankedIds"][0] if result["rankedIds"] else "pool-limit"

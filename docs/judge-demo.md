@@ -1,5 +1,18 @@
 # Faultfix judge demo
 
+## Record this instead: 100 seconds, no live-model risk
+
+Use this version for the submission video. It only uses deterministic controls, so it works even if a model provider is slow or unavailable. Before recording, open the [live Space](https://huggingface.co/spaces/jacklachan/faultfix) and press `Ctrl` + `+` twice to make the text comfortably large.
+
+1. **0:00 — Start at the top.** Say: “Hi. This is Faultfix. AI agents can investigate an outage, but they should not be able to give themselves permission to change production. Faultfix is the layer that makes them earn that permission.”
+2. **0:15 — Scroll to `01 / PROVE THE CONTROL`; click `Block a hostile production command`.** Say: “I built Faultfix with Codex and GPT-5.6. I used them to build the interface, policy engine, automated tests, and this deployed demo. They helped build it; they do not decide production actions.”
+3. **0:31 — Point at `QUARANTINE` and `BLOCK`.** Say: “This ticket asks the agent to make a global production change. Faultfix quarantines it before the agent can see it, and the action is blocked. No model call is required for this safety decision.”
+4. **0:48 — Scroll to `01B / SIMULATE AUTHORITY`; under `Requested action`, choose `Make a permanent change`; leave `Causal proof` on `Incomplete`; click `Evaluate authority`.** Say: “Here I am asking for a permanent change with incomplete proof. The policy blocks it. Faultfix, not the model, makes that decision.”
+5. **1:08 — Under `Causal proof`, choose `Reproduced`; click `Evaluate authority` again.** Say: “Now the proof is reproduced. Even then, Faultfix does not make the change automatically. It moves the request to human review.”
+6. **1:25 — Hold on the receipt.** Say: “That is Faultfix: a model can recommend and investigate, but it can never authorize itself. Faultfix sits underneath any incident agent to protect production decisions. Thank you.”
+
+Do not use **Run live investigator** or **Run four-pack challenge suite** in the recording. They are optional model demonstrations, not the clearest proof of the product.
+
 ## The one sentence
 
 **An AI agent must earn the right to act.**
