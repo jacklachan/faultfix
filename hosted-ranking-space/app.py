@@ -10,6 +10,7 @@ from threading import Lock
 from time import monotonic
 
 import gradio as gr
+import spaces
 from huggingface_hub import InferenceClient
 from transformers import pipeline
 
@@ -53,6 +54,13 @@ def warm_ranker():
     except Exception:
         # Ranking retains its deterministic fallback if this optional model cannot load.
         pass
+
+
+# ZeroGPU Spaces require one decorated function during startup even though the
+# optional advisory ranker itself is deliberately CPU-safe.
+@spaces.GPU
+def declare_zero_gpu_runtime():
+    return "ZeroGPU runtime ready"
 
 
 def deterministic_order(hypotheses):
