@@ -109,25 +109,77 @@ The public case library links directly to the original [Google Cloud GCE postmor
 
 ---
 
-## Run locally
+## Install the policy CLI
+
+Faultfix includes an installable, offline **policy preflight** for terminal and CI use. It evaluates only fixed structured attributes; it never sends raw logs, prompts, or secrets anywhere, and it can never execute a production action.
+
+**Supported platforms:** Windows, macOS, and Linux with Python 3.10+.
 
 ```bash
-npm install
+pipx install "git+https://github.com/jacklachan/faultfix.git"
+faultfix check \
+  --trust trusted \
+  --replay within-cutoff \
+  --action permanent \
+  --proof reproduced \
+  --scenario "Checkout timeouts after deployment" \
+  --format json
+```
+
+`pipx` keeps this developer tool in an isolated environment. If it is not installed, run `python -m pip install --user pipx` first (on Windows, use `py` in place of `python`), then restart the terminal after `python -m pipx ensurepath`.
+
+The command returns a fingerprinted receipt from the same policy used by the Space. It intentionally exits with `0` for `ALLOW`, `20` for `REVIEW`, `30` for `BLOCK`, and `64` for malformed policy input, so a pipeline or agent wrapper cannot mistake human review for permission to proceed.
+
+For CI, pass only the bounded policy fields in JSON—never a raw incident log:
+
+```json
+{
+  "evidence_trust": "trusted",
+  "replay_status": "within-cutoff",
+  "requested_action": "permanent",
+  "proof_state": "reproduced",
+  "scenario_label": "Checkout timeouts after deployment"
+}
+```
+
+```bash
+faultfix check --input faultfix-policy.json --format json
+```
+
+The scenario label is display-only. It is not model context, policy evidence, or part of the receipt fingerprint.
+
+## Run the full product locally
+
+The browser walkthrough requires Node.js 20+:
+
+```bash
+npm ci
 npm run dev
 ```
 
-Then open the local URL printed by Next.js. Validate the build with:
+Open the local URL printed by Next.js. For the full Gradio incident lab, use Python 3.10+:
 
 ```bash
-npm test
-npm run test:space
-npm run lint
-npm run build
+python -m venv .venv
+# Windows: .\.venv\Scripts\Activate.ps1
+# macOS/Linux: source .venv/bin/activate
+python -m pip install -r hosted-ranking-space/requirements.txt
+python hosted-ranking-space/app.py
 ```
+
+The optional local advisory model may download on its first launch. `HF_TOKEN` is only needed for the optional live investigator; the authority simulator, firewall drill, and CLI work without it.
+
+Validate the project with:
+
+```bash
+npm run verify
+```
+
+On Windows, `npm run verify` uses the `py` launcher. On macOS/Linux, run the Python checks directly with `python3 scripts/verify-authority-simulator.py` and `python3 scripts/verify-faultfix-cli.py`.
 
 ## Judge and tester quickstart
 
-You can test Faultfix without rebuilding it or supplying an API key:
+You can test Faultfix without rebuilding it, installing anything, or supplying an API key:
 
 1. Open the public [Faultfix Space](https://huggingface.co/spaces/jacklachan/faultfix).
 2. Run **Block a hostile production command** to see untrusted ticket content quarantined before model inference.

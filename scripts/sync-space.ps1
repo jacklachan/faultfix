@@ -7,9 +7,9 @@ param(
 $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $spacePath = Join-Path $repoRoot "hosted-ranking-space"
-$approvedSpaceFiles = @("README.md", "app.py", "requirements.txt")
+$approvedSpaceFiles = @("README.md", "app.py", "faultfix_policy.py", "requirements.txt")
 $remoteCleanupPatterns = @(
-  "__pycache__/**", "**/__pycache__/**", "*.pyc", "**/*.pyc",
+  "__pycache__/**", "**/__pycache__/**", "*.pyc", "**/*.pyc", "*.egg-info/**", "**/*.egg-info/**",
   ".env", ".env.*", "**/.env", "**/.env.*"
 )
 
@@ -38,7 +38,7 @@ if ($localFiles | Where-Object { $_ -match "(^|/)\.env($|\.)" }) {
 
 $unexpectedLocalFiles = @(
   $localFiles | Where-Object {
-    ($_ -notin $approvedSpaceFiles) -and ($_ -notmatch "^__pycache__/.*\.pyc$")
+    ($_ -notin $approvedSpaceFiles) -and ($_ -notmatch "^__pycache__/.*\.pyc$") -and ($_ -notmatch "(^|/)[^/]+\.egg-info/.*$")
   }
 )
 if ($unexpectedLocalFiles) {

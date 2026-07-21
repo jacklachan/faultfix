@@ -18,11 +18,13 @@ from pathlib import Path
 
 
 APP_PATH = Path(__file__).resolve().parents[1] / "hosted-ranking-space" / "app.py"
+SPACE_DIR = APP_PATH.parent
 TARGET = "render_authority_simulator"
 LOAD_UNTIL = "reset_authority_simulator"
 
 
 def load_simulator_namespace():
+    sys.path.insert(0, str(SPACE_DIR))
     source = APP_PATH.read_text(encoding="utf-8")
     tree = ast.parse(source, filename=str(APP_PATH))
     body = []

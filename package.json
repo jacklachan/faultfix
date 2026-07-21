@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:space": "py scripts/verify-authority-simulator.py"
+    "test:space": "py scripts/verify-authority-simulator.py",
+    "test:cli": "py scripts/verify-faultfix-cli.py",
+    "verify": "npm test && npm run test:space && npm run test:cli && npm run lint && npm run build"
   },
   "dependencies": {
     "next": "16.2.10",

@@ -14,6 +14,13 @@ import spaces
 from huggingface_hub import InferenceClient
 from transformers import pipeline
 
+from faultfix_policy import (
+    AUTHORITY_SIMULATOR_DEFAULTS,
+    evaluate_authority_simulator,
+    normalize_scenario_label,
+    policy_authority,
+)
+
 MODEL_ID = "google/flan-t5-small"
 
 
@@ -479,134 +486,6 @@ def invoke_live_model(prompt, evidence_count):
         pass
 
     return None, None, "Hugging Face Inference Providers did not return a validated response. Confirm that HF_TOKEN has Inference Providers permission and that the selected Hugging Face model is available."
-
-
-def policy_authority(requested_action, has_release_evidence, proof_reproduced=False):
-    """Return the shared authority decision for both live and deterministic paths."""
-    if requested_action == "observe" or requested_action == "none":
-        return "ALLOW", "Read-only investigation is within the boundary."
-    if requested_action == "contain" and has_release_evidence:
-        return "REVIEW", "Containment is reversible and in scope, but an incident commander must approve the action lease."
-    if requested_action == "contain":
-        return "BLOCK", "Containment scope is not evidenced yet. Collect a trustworthy release or infrastructure boundary first."
-    if requested_action == "permanent" and has_release_evidence and proof_reproduced:
-        return "REVIEW", "Causal proof is reproduced, but a permanent change still needs human approval and staged rollout."
-    return "BLOCK", "Permanent changes remain blocked until the deterministic causal proof gate and reproduction are complete."
-
-
-AUTHORITY_SIMULATOR_POLICY = "faultfix-authority-simulator/v1"
-AUTHORITY_SIMULATOR_DEFAULTS = {
-    "evidence_trust": "trusted",
-    "replay_status": "within-cutoff",
-    "requested_action": "contain",
-    "proof_state": "incomplete",
-}
-AUTHORITY_SIMULATOR_ALLOWED = {
-    "evidence_trust": {"trusted", "untrusted"},
-    "replay_status": {"within-cutoff", "post-cutoff"},
-    "requested_action": {"observe", "contain", "permanent"},
-    "proof_state": {"incomplete", "reproduced"},
-}
-
-
-def normalize_simulator_choice(value, field):
-    """Accept only the simulator's fixed policy enums and fail closed otherwise."""
-    if isinstance(value, str) and value in AUTHORITY_SIMULATOR_ALLOWED[field]:
-        return value
-    # The UI only offers fixed values, but the public app must also fail closed
-    # if a malformed browser or API request reaches this function.
-    return {
-        "evidence_trust": "untrusted",
-        "replay_status": "post-cutoff",
-        "requested_action": "permanent",
-        "proof_state": "incomplete",
-    }[field]
-
-
-def normalize_scenario_label(value):
-    """Keep a user-supplied scenario label bounded and display-only."""
-    if not isinstance(value, str):
-        return ""
-    return " ".join(value.split())[:120]
-
-
-def evaluate_authority_simulator(evidence_trust, replay_status, requested_action, proof_state):
-    """Evaluate a bounded policy scenario without consulting a model or provider."""
-    trust = normalize_simulator_choice(evidence_trust, "evidence_trust")
-    replay = normalize_simulator_choice(replay_status, "replay_status")
-    action = normalize_simulator_choice(requested_action, "requested_action")
-    proof = normalize_simulator_choice(proof_state, "proof_state")
-
-    # Replay status wins, matching the Evidence Firewall: hindsight never gains
-    # influence merely because it comes from a trusted source.
-    if replay == "post-cutoff":
-        disposition = "future"
-        evidence_label = "EXCLUDE"
-        model_reach = "none"
-        model_context = "0 bytes / post-cutoff evidence excluded"
-        authority = "BLOCK"
-        reason = "The observation falls outside the replay boundary, so it cannot influence this decision."
-        next_step = "Use a trustworthy observation captured before the replay cutoff."
-        lease = "Not issued"
-    elif trust == "untrusted":
-        disposition = "quarantine"
-        evidence_label = "QUARANTINE"
-        model_reach = "none"
-        model_context = "0 bytes / untrusted content quarantined"
-        authority = "BLOCK"
-        reason = "Untrusted content cannot become model context or action authority."
-        next_step = "Replace it with a first-party, scope-bound fact before evaluating an action."
-        lease = "Not issued"
-    else:
-        disposition = "admit"
-        evidence_label = "ADMIT"
-        model_reach = "admitted"
-        model_context = "1 normalized, scope-bound fact"
-        authority, reason = policy_authority(
-            action,
-            has_release_evidence=True,
-            proof_reproduced=proof == "reproduced",
-        )
-        if authority == "ALLOW":
-            next_step = "Collect the next trustworthy fact without changing production state."
-            lease = "Not required"
-        elif action == "contain":
-            next_step = "Request a narrow, time-bounded containment lease bound to this receipt."
-            lease = "Pending human approval"
-        elif authority == "REVIEW":
-            next_step = "Prepare the smallest staged change packet for human review."
-            lease = "Pending human approval"
-        else:
-            next_step = "Reproduce the causal mechanism before proposing a permanent change."
-            lease = "Not issued"
-
-    receipt_input = {
-        "action": action,
-        "disposition": disposition,
-        "policy": AUTHORITY_SIMULATOR_POLICY,
-        "proof": proof,
-        "replay": replay,
-        "trust": trust,
-    }
-    fingerprint = hashlib.sha256(
-        json.dumps(receipt_input, sort_keys=True, separators=(",", ":")).encode("utf-8")
-    ).hexdigest()[:12].upper()
-    return {
-        "authority": authority,
-        "disposition": disposition,
-        "evidence_label": evidence_label,
-        "lease": lease,
-        "model_context": model_context,
-        "model_reach": model_reach,
-        "next_step": next_step,
-        "policy": AUTHORITY_SIMULATOR_POLICY,
-        "proof": proof,
-        "reason": reason,
-        "receipt_fingerprint": fingerprint,
-        "requested_action": action,
-        "replay": replay,
-        "trust": trust,
-    }
 
 
 def render_authority_simulator(
