@@ -50,7 +50,7 @@ The graphic above and the diagram are the same contract: raw, untrusted content 
 | Demo moment | What judges see | Why it matters |
 | --- | --- | --- |
 | **Hostile ticket** | A global production command is `BLOCK`ed and **0** raw ticket bytes reach model context | Prompt injection is stopped before inference, not “handled” by asking the model nicely |
-| **Authority Simulator** | A judge can change trust, replay time, action scope, and proof state to produce a fingerprinted `ALLOW` / `REVIEW` / `BLOCK` receipt | The policy boundary is inspectable without an API key, a provider call, or any Hugging Face credit |
+| **Authority Simulator** | A judge can name a non-sensitive scenario, then change trust, replay time, action scope, and proof state to produce a fingerprinted `ALLOW` / `REVIEW` / `BLOCK` receipt | The scenario label is display-only; the policy boundary is inspectable without an API key, a provider call, or any Hugging Face credit |
 | **INC-042** | A reversible containment route before causal proof is complete | Containment is not a root-cause verdict |
 | **Four-pack challenge** | Capacity, DNS, identity rotation, and insufficient-evidence packs | The model advises across different cases; the authority policy stays the same |
 | **Public case library** | Google Cloud and Cloudflare postmortems become provenance-tagged evidence | The product can work with real public evidence without pretending it has live production telemetry |
@@ -131,7 +131,7 @@ You can test Faultfix without rebuilding it or supplying an API key:
 
 1. Open the public [Faultfix Space](https://huggingface.co/spaces/jacklachan/faultfix).
 2. Run **Block a hostile production command** to see untrusted ticket content quarantined before model inference.
-3. In **Authority Simulator**, select a permanent action with incomplete proof, then reproduced proof. The policy moves from `BLOCK` to `REVIEW`; it never auto-executes and always reports `model calls: 0`.
+3. In **Try your scenario**, optionally add a non-sensitive issue label, then select a permanent action with incomplete proof and then reproduced proof. The policy moves from `BLOCK` to `REVIEW`; it never auto-executes and always reports `model calls: 0`. The label never reaches a model or changes the receipt.
 4. Open a public incident pack to inspect bounded, source-linked Google Cloud or Cloudflare evidence.
 5. Optionally run the hosted investigator. It uses the Space owner's Hugging Face provider configuration, validates every response, and remains advisory. If the provider is unavailable, the deterministic controls still work and the UI says so rather than fabricating an answer.
 
@@ -164,7 +164,7 @@ The public [Faultfix Space](https://huggingface.co/spaces/jacklachan/faultfix) e
 
 Every live response is schema-validated; malformed output is safely rejected. The model can select an advisory next step from sanitized evidence, while Faultfix independently returns `ALLOW`, `REVIEW`, or `BLOCK`.
 
-The Space also includes an Authority Simulator that evaluates fixed trust, replay, action, and proof attributes locally in the policy layer. It never reserves a live-model budget or invokes Hugging Face Inference Providers.
+The Space also includes an Authority Simulator where a visitor can name a non-sensitive scenario and evaluate fixed trust, replay, action, and proof attributes locally in the policy layer. The label is display-only; it never reserves a live-model budget, becomes policy evidence, or invokes Hugging Face Inference Providers.
 
 </details>
 

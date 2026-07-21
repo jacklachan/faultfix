@@ -523,6 +523,13 @@ def normalize_simulator_choice(value, field):
     }[field]
 
 
+def normalize_scenario_label(value):
+    """Keep a user-supplied scenario label bounded and display-only."""
+    if not isinstance(value, str):
+        return ""
+    return " ".join(value.split())[:120]
+
+
 def evaluate_authority_simulator(evidence_trust, replay_status, requested_action, proof_state):
     """Evaluate a bounded policy scenario without consulting a model or provider."""
     trust = normalize_simulator_choice(evidence_trust, "evidence_trust")
@@ -602,7 +609,9 @@ def evaluate_authority_simulator(evidence_trust, replay_status, requested_action
     }
 
 
-def render_authority_simulator(evidence_trust, replay_status, requested_action, proof_state):
+def render_authority_simulator(
+    evidence_trust, replay_status, requested_action, proof_state, scenario_label=""
+):
     """Render a judge-readable receipt for the deterministic authority simulator."""
     result = evaluate_authority_simulator(
         evidence_trust,
@@ -611,13 +620,18 @@ def render_authority_simulator(evidence_trust, replay_status, requested_action, 
         proof_state,
     )
     authority_class = result["authority"].lower()
-    return f"""<section class='authority-simulator-result {authority_class}' role='status' aria-live='polite' data-authority='{result['authority']}' data-evidence-disposition='{result['disposition']}' data-model-reach='{result['model_reach']}' data-model-calls='0' data-receipt-fingerprint='{result['receipt_fingerprint']}'><div class='simulator-receipt-head'><div><span>DECISION RECEIPT / FAULTFIX POLICY V1</span><h3>Policy, not the model, decides.</h3></div><code>RECEIPT {result['receipt_fingerprint']}</code></div><div class='simulator-receipt-grid'><div class='simulator-cell {result['disposition']}'><span>EVIDENCE GATE</span><b>{result['evidence_label']}</b><small>{result['model_context']}</small></div><div class='simulator-cell'><span>REQUESTED ACTION</span><b>{html.escape(result['requested_action'])}</b><small>proof: {html.escape(result['proof'])}</small></div><div class='simulator-cell authority {authority_class}'><span>FAULTFIX AUTHORITY</span><b>{result['authority']}</b><small>model calls: 0</small></div></div><div class='simulator-explanation'><div><span>WHY THIS RESULT</span><p>{html.escape(result['reason'])}</p></div><div><span>NEXT BOUNDARY</span><p>{html.escape(result['next_step'])}</p></div></div><div class='simulator-footer'><span>ACTION LEASE / {html.escape(result['lease'].upper())}</span><span>{html.escape(result['policy'])}</span></div></section>"""
+    scenario = normalize_scenario_label(scenario_label)
+    scenario_markup = ""
+    if scenario:
+        scenario_markup = f"""<div class='simulator-scenario'><span>SCENARIO UNDER TEST / LABEL ONLY</span><p>{html.escape(scenario)}</p><small>Not sent to a model and not used as policy evidence. The structured controls below decide the receipt.</small></div>"""
+    return f"""<section class='authority-simulator-result {authority_class}' role='status' aria-live='polite' data-authority='{result['authority']}' data-evidence-disposition='{result['disposition']}' data-model-reach='{result['model_reach']}' data-model-calls='0' data-receipt-fingerprint='{result['receipt_fingerprint']}'><div class='simulator-receipt-head'><div><span>DECISION RECEIPT / FAULTFIX POLICY V1</span><h3>Policy, not the model, decides.</h3></div><code>RECEIPT {result['receipt_fingerprint']}</code></div>{scenario_markup}<div class='simulator-receipt-grid'><div class='simulator-cell {result['disposition']}'><span>EVIDENCE GATE</span><b>{result['evidence_label']}</b><small>{result['model_context']}</small></div><div class='simulator-cell'><span>REQUESTED ACTION</span><b>{html.escape(result['requested_action'])}</b><small>proof: {html.escape(result['proof'])}</small></div><div class='simulator-cell authority {authority_class}'><span>FAULTFIX AUTHORITY</span><b>{result['authority']}</b><small>model calls: 0</small></div></div><div class='simulator-explanation'><div><span>WHY THIS RESULT</span><p>{html.escape(result['reason'])}</p></div><div><span>NEXT BOUNDARY</span><p>{html.escape(result['next_step'])}</p></div></div><div class='simulator-footer'><span>ACTION LEASE / {html.escape(result['lease'].upper())}</span><span>{html.escape(result['policy'])}</span></div></section>"""
 
 
 def reset_authority_simulator():
     """Return the review-gated default without touching any inference path."""
     defaults = AUTHORITY_SIMULATOR_DEFAULTS
     return (
+        "",
         defaults["evidence_trust"],
         defaults["replay_status"],
         defaults["requested_action"],
@@ -922,6 +936,9 @@ CSS += """
 #authority-simulator .block { border-color:#4f8878!important; background:#102d2a!important; }
 #authority-simulator .label-wrap > span,#authority-simulator label { color:#f0fff8!important; font-size:12px!important; letter-spacing:.06em!important; }
 #authority-simulator .secondary-wrap,#authority-simulator .secondary-wrap * { color:#d0e8dd!important; font-size:12px!important; }
+#simulator-scenario-label { margin:2px 0 4px!important; }
+#simulator-scenario-label textarea,#simulator-scenario-label input { min-height:46px!important; color:#f2fff8!important; background:#102a2b!important; border-color:#5f9a8a!important; font-size:14px!important; }
+#simulator-scenario-label textarea::placeholder,#simulator-scenario-label input::placeholder { color:#c4d9d0!important; opacity:1!important; }
 #authority-simulator .wrap label { min-height:44px!important; border-color:#5b9584!important; background:#0c211f!important; color:#f0fff8!important; font-size:13px!important; font-weight:650!important; }
 #authority-simulator .wrap label,#authority-simulator .wrap label span,#authority-simulator label * { color:inherit!important; opacity:1!important; }
 #authority-simulator .wrap label.selected,#authority-simulator .wrap label:has(input:checked) { border-color:#9df0cc!important; background:#185a49!important; color:#ffffff!important; box-shadow:inset 3px 0 #9df0cc!important; }
@@ -930,6 +947,10 @@ CSS += """
 .authority-simulator-result { border-color:#5b9d89!important; background:#0a211f!important; }
 .simulator-receipt-head span,.simulator-cell span,.simulator-explanation span,.simulator-footer { color:#9de9c8!important; font-size:11px!important; }
 .simulator-receipt-head code { color:#d8f5e8!important; border-color:#5f9d8a!important; }
+.simulator-scenario { margin:14px 0 0; border:1px solid #4f8878; border-left:3px solid #9df0cc; background:#0d2926; padding:11px 13px; }
+.simulator-scenario span { color:#9de9c8; font:800 10px 'DM Mono','SFMono-Regular',Consolas,monospace; letter-spacing:.09em; }
+.simulator-scenario p { margin:5px 0; color:#f2fff8; font-size:14px; font-weight:700; }
+.simulator-scenario small { color:#cfe4db; font-size:12px; line-height:1.45; }
 .simulator-receipt-grid { border-color:#4f8878!important; background:#0b201e!important; }
 .simulator-cell { border-color:#4f8878!important; }
 .simulator-cell b { color:#f2fff9!important; font-size:16px!important; }
@@ -1006,9 +1027,17 @@ with gr.Blocks(title="faultfix | agent authority lab", css=CSS, head=HEAD) as de
         lab_button = gr.Button("Run the authority trace", elem_id="agent-lab")
     attack_output = gr.HTML("<section class='result-placeholder' role='status' aria-live='polite'><b>READY / ATTACK TRACE</b><br>Show what the agent is never allowed to see or do.</section>", elem_id="attack-result")
     lab_output = gr.HTML("<section class='result-placeholder' role='status' aria-live='polite'><b>READY / AUTHORITY TRACE</b><br>Run the deterministic policy baseline to inspect allow, review, and block decisions.</section>", elem_id="lab-result")
-    gr.HTML("""<section class='section-heading'><div><span class='section-number'>01B / SIMULATE AUTHORITY</span><h2 class='section-title'>See policy make the decision.</h2></div><p>All inputs are simulated policy attributes. This receipt is deterministic: no model call, no provider call, and no Hugging Face credit.</p></section>""")
+    gr.HTML("""<section class='section-heading'><div><span class='section-number'>01B / TRY YOUR SCENARIO</span><h2 class='section-title'>Test an issue without giving a model the keys.</h2></div><p>Name a non-sensitive scenario, then test its evidence, action, and proof boundary. This receipt is deterministic: no model call, no provider call, and no Hugging Face credit.</p></section>""")
     with gr.Group(elem_id="authority-simulator"):
-        gr.HTML("<p class='action-note'><b>CONTROL SURFACE</b> / CHANGE EVIDENCE TRUST, REPLAY TIMING, ACTION SCOPE, AND CAUSAL PROOF. THE POLICY FAILS CLOSED.</p>")
+        gr.HTML("<p class='action-note'><b>SAFE SCENARIO SANDBOX</b> / ADD A SHORT, NON-SENSITIVE LABEL, THEN SET THE STRUCTURED FACTS. YOUR LABEL IS NEVER MODEL INPUT OR POLICY EVIDENCE.</p>")
+        simulator_scenario = gr.Textbox(
+            label="Name the issue you want to test (optional)",
+            placeholder="Example: Checkout timeouts after a deploy",
+            info="Do not include secrets or raw logs. This label is not sent to a model and does not influence the policy decision.",
+            max_length=120,
+            lines=1,
+            elem_id="simulator-scenario-label",
+        )
         with gr.Row(equal_height=True):
             simulator_trust = gr.Radio(
                 choices=[("Trusted and scope-bound", "trusted"), ("Untrusted external content", "untrusted")],
@@ -1035,7 +1064,7 @@ with gr.Blocks(title="faultfix | agent authority lab", css=CSS, head=HEAD) as de
                 info="Reproduction can earn human review, never automatic write authority.",
             )
         with gr.Row(equal_height=True):
-            simulator_button = gr.Button("Evaluate authority", elem_id="simulator-evaluate", scale=2)
+            simulator_button = gr.Button("Evaluate scenario authority", elem_id="simulator-evaluate", scale=2)
             simulator_reset = gr.Button("Reset to review scenario", elem_id="simulator-reset", scale=1)
     simulator_output = gr.HTML(
         render_authority_simulator(
@@ -1082,7 +1111,7 @@ with gr.Blocks(title="faultfix | agent authority lab", css=CSS, head=HEAD) as de
     lab_button.click(render_agent_lab, inputs=None, outputs=lab_output, show_progress="minimal", scroll_to_output=True)
     simulator_button.click(
         render_authority_simulator,
-        inputs=[simulator_trust, simulator_replay, simulator_action, simulator_proof],
+        inputs=[simulator_trust, simulator_replay, simulator_action, simulator_proof, simulator_scenario],
         outputs=simulator_output,
         show_progress="hidden",
         scroll_to_output=True,
@@ -1091,7 +1120,7 @@ with gr.Blocks(title="faultfix | agent authority lab", css=CSS, head=HEAD) as de
     simulator_reset.click(
         reset_authority_simulator,
         inputs=None,
-        outputs=[simulator_trust, simulator_replay, simulator_action, simulator_proof, simulator_output],
+        outputs=[simulator_scenario, simulator_trust, simulator_replay, simulator_action, simulator_proof, simulator_output],
         show_progress="hidden",
         api_name=False,
     )

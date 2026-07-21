@@ -19,6 +19,7 @@ from pathlib import Path
 
 APP_PATH = Path(__file__).resolve().parents[1] / "hosted-ranking-space" / "app.py"
 TARGET = "render_authority_simulator"
+LOAD_UNTIL = "reset_authority_simulator"
 
 
 def load_simulator_namespace():
@@ -39,10 +40,10 @@ def load_simulator_namespace():
             ),
         ):
             body.append(node)
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == TARGET:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == LOAD_UNTIL:
             break
     else:
-        raise AssertionError(f"{TARGET} was not found in {APP_PATH}")
+        raise AssertionError(f"{LOAD_UNTIL} was not found in {APP_PATH}")
 
     gradio = types.ModuleType("gradio")
     gradio.Request = object
@@ -166,6 +167,31 @@ def main() -> None:
     assert malformed["authority"] == "BLOCK"
     assert malformed["model_reach"] == "none"
 
+    # Scenario labels make the control easier to apply to a user's own issue,
+    # but they are display-only: they are escaped, bounded, never model input,
+    # and never change an authority receipt.
+    scenario_markup = render(
+        "trusted",
+        "within-cutoff",
+        "permanent",
+        "incomplete",
+        "Checkout <script>alert(1)</script> after deploy",
+    )
+    empty_markup = render("trusted", "within-cutoff", "permanent", "incomplete")
+    assert "SCENARIO UNDER TEST / LABEL ONLY" in scenario_markup
+    assert "&lt;script&gt;" in scenario_markup
+    assert "<script>" not in scenario_markup
+    assert attribute(scenario_markup, "data-receipt-fingerprint") == attribute(
+        empty_markup, "data-receipt-fingerprint"
+    )
+    normalize_scenario_label = namespace["normalize_scenario_label"]
+    assert len(normalize_scenario_label("x " * 200)) == 120
+
+    reset = namespace["reset_authority_simulator"]
+    reset_values = reset()
+    assert reset_values[:5] == ("", "trusted", "within-cutoff", "contain", "incomplete")
+    assert attribute(reset_values[5], "data-authority") == "REVIEW"
+
     # The simulator and live path share the permanent-action rule: reproduction
     # earns human review, never automatic execution. A live pack without
     # reproduced proof remains blocked.
@@ -197,6 +223,7 @@ def main() -> None:
     print("PASS: 24/24 deterministic simulator states")
     print("PASS: authorities", dict(outcomes))
     print("PASS: zero model/HF/provider calls")
+    print("PASS: user scenario labels stay escaped, bounded, and outside policy input")
     print("PASS: live-model schema requires cited support and shares permanent-action policy")
 
 
