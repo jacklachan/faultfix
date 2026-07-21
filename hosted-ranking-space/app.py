@@ -10,7 +10,6 @@ from threading import Lock
 from time import monotonic
 
 import gradio as gr
-import spaces
 from huggingface_hub import InferenceClient
 from transformers import pipeline
 
@@ -54,12 +53,6 @@ def warm_ranker():
     except Exception:
         # Ranking retains its deterministic fallback if this optional model cannot load.
         pass
-
-
-@spaces.GPU
-def declare_zero_gpu_runtime():
-    """Required ZeroGPU declaration; advisory ranking itself remains CPU-safe."""
-    return "ZeroGPU runtime ready"
 
 
 def deterministic_order(hypotheses):
@@ -331,6 +324,7 @@ def normalize_live_answer(text, evidence_count=None):
         or not isinstance(rationale, str)
         or not 1 <= len(rationale.strip()) <= 700
         or not isinstance(evidence_ids, list)
+        or (answer["claim_status"] == "supported" and not evidence_ids)
         or len(evidence_ids) > 12
         or not all(isinstance(evidence_id, str) and EVIDENCE_ID_PATTERN.fullmatch(evidence_id) for evidence_id in evidence_ids)
         or len(set(evidence_ids)) != len(evidence_ids)
@@ -478,13 +472,16 @@ def invoke_live_model(prompt, evidence_count):
     return None, None, "Hugging Face Inference Providers did not return a validated response. Confirm that HF_TOKEN has Inference Providers permission and that the selected Hugging Face model is available."
 
 
-def policy_authority(requested_action, has_release_evidence):
+def policy_authority(requested_action, has_release_evidence, proof_reproduced=False):
+    """Return the shared authority decision for both live and deterministic paths."""
     if requested_action == "observe" or requested_action == "none":
         return "ALLOW", "Read-only investigation is within the boundary."
     if requested_action == "contain" and has_release_evidence:
-        return "REVIEW", "Containment is reversible and needs incident-commander approval tied to the evidence pack."
+        return "REVIEW", "Containment is reversible and in scope, but an incident commander must approve the action lease."
     if requested_action == "contain":
         return "BLOCK", "Containment scope is not evidenced yet. Collect a trustworthy release or infrastructure boundary first."
+    if requested_action == "permanent" and has_release_evidence and proof_reproduced:
+        return "REVIEW", "Causal proof is reproduced, but a permanent change still needs human approval and staged rollout."
     return "BLOCK", "Permanent changes remain blocked until the deterministic causal proof gate and reproduction are complete."
 
 
@@ -549,24 +546,21 @@ def evaluate_authority_simulator(evidence_trust, replay_status, requested_action
         evidence_label = "ADMIT"
         model_reach = "admitted"
         model_context = "1 normalized, scope-bound fact"
-        if action == "observe":
-            authority = "ALLOW"
-            reason = "Read-only investigation is within the admitted evidence boundary."
+        authority, reason = policy_authority(
+            action,
+            has_release_evidence=True,
+            proof_reproduced=proof == "reproduced",
+        )
+        if authority == "ALLOW":
             next_step = "Collect the next trustworthy fact without changing production state."
             lease = "Not required"
         elif action == "contain":
-            authority = "REVIEW"
-            reason = "Containment is reversible and in scope, but an incident commander must approve the lease."
             next_step = "Request a narrow, time-bounded containment lease bound to this receipt."
             lease = "Pending human approval"
-        elif proof == "reproduced":
-            authority = "REVIEW"
-            reason = "Causal proof is reproduced, but a permanent change still needs human approval and staged rollout."
+        elif authority == "REVIEW":
             next_step = "Prepare the smallest staged change packet for human review."
             lease = "Pending human approval"
         else:
-            authority = "BLOCK"
-            reason = "A permanent change cannot proceed until causal proof is independently reproduced."
             next_step = "Reproduce the causal mechanism before proposing a permanent change."
             lease = "Not issued"
 

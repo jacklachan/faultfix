@@ -1,4 +1,4 @@
-"""Exhaustively verify the Space Authority Simulator without starting the app.
+"""Verify the Space policy boundary without starting the app.
 
 This standard-library test selectively loads only the module definitions needed for
 the simulator. It poisons every model and provider helper so a future refactor
@@ -8,6 +8,7 @@ cannot accidentally turn the no-cost control surface into an inference path.
 from __future__ import annotations
 
 import ast
+import json
 import re
 import sys
 import types
@@ -164,11 +165,38 @@ def main() -> None:
     assert malformed["disposition"] == "future"
     assert malformed["authority"] == "BLOCK"
     assert malformed["model_reach"] == "none"
+
+    # The simulator and live path share the permanent-action rule: reproduction
+    # earns human review, never automatic execution. A live pack without
+    # reproduced proof remains blocked.
+    policy_authority = namespace["policy_authority"]
+    assert policy_authority("permanent", True, proof_reproduced=False)[0] == "BLOCK"
+    permanent_review = evaluate("trusted", "within-cutoff", "permanent", "reproduced")
+    assert policy_authority("permanent", True, proof_reproduced=True) == (
+        permanent_review["authority"],
+        permanent_review["reason"],
+    )
+
+    # A model cannot claim support without citing at least one bounded evidence
+    # ID. This is checked before any answer can reach the live UI.
+    normalize_live_answer = namespace["normalize_live_answer"]
+    uncited_supported = {
+        "hypothesis": "pool-limit",
+        "claim_status": "supported",
+        "next_evidence": "Inspect the release diff.",
+        "requested_action": "observe",
+        "rationale": "The claim needs a cited fact.",
+        "evidence_ids_used": [],
+    }
+    rejected, accepted = normalize_live_answer(json.dumps(uncited_supported), evidence_count=4)
+    assert not accepted
+    assert rejected["claim_status"] == "unsupported"
     assert not calls, f"Simulator touched forbidden inference/provider paths: {calls}"
 
     print("PASS: 24/24 deterministic simulator states")
     print("PASS: authorities", dict(outcomes))
     print("PASS: zero model/HF/provider calls")
+    print("PASS: live-model schema requires cited support and shares permanent-action policy")
 
 
 if __name__ == "__main__":
